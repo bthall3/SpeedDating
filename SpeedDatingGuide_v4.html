@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Speed Dating Guide | UA Social Psychology Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #faf9f7;
+  --white:     #ffffff;
+  --crimson:   #9E1B32;
+  --crimson-d: #7a1426;
+  --tan-stripe:#c8a898;
+  --tip-bg:    #ecddd6;
+  --tip-text:  #3e2418;
+  --border:    rgba(120,80,60,0.13);
+  --text:      #201c1a;
+  --text-mid:  #52443e;
+  --text-muted:#9c8474;
+  --ghost:     #e0d4ca;
+  --rule-ht:   2px;
+  --radius:    10px;
+  --content-max: 720px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px; }
+
+/* ── NAV ── */
+.nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(250,249,247,0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  height: 52px; padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--crimson); flex-shrink: 0; }
+.nav-name { font-family: 'Lora', serif; font-size: 1rem; color: var(--text); }
+.nav-tag { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+
+/* ── PROGRESS ── */
+.progress-rail { position: sticky; top: 52px; z-index: 150; height: 2px; background: var(--border); }
+.progress-fill { height: 100%; background: var(--crimson); width: 0%; transition: width 0.1s; }
+
+/* ── HERO ── */
+.hero {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 4.5rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-ring {
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(158,27,50,0.07);
+  pointer-events: none;
+}
+.hero-ring-1 { width: 340px; height: 340px; top: -120px; right: -80px; }
+.hero-ring-2 { width: 220px; height: 220px; bottom: -80px; left: -60px; }
+.hero-ring-3 { width: 100px; height: 100px; top: 30px; left: 8%; }
+.hero-ring-4 { width: 60px;  height: 60px;  bottom: 24px; right: 10%; }
+
+.hero-inner { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; }
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  justify-content: center; margin-bottom: 1.4rem;
+}
+.hero-eyebrow-line { flex: 0 0 24px; height: 1px; background: var(--crimson); opacity: 0.35; }
+.hero-eyebrow-text { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--crimson); font-weight: 600; }
+.hero h1 {
+  font-family: 'Lora', serif; font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  font-weight: 400; color: var(--text); line-height: 1.2;
+  margin-bottom: 1rem; letter-spacing: -0.01em;
+}
+.hero h1 em { font-style: italic; color: var(--crimson); }
+.hero-sub { font-size: 1rem; color: var(--text-mid); max-width: 420px; margin: 0 auto 1.5rem; line-height: 1.65; }
+.hero-pills { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.hero-pill {
+  font-size: 0.72rem; color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 99px;
+  padding: 3px 11px; background: rgba(255,255,255,0.5);
+}
+
+/* ── CITE STRIP ── */
+.cite-strip {
+  display: flex; gap: 10px; align-items: flex-start;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.85rem 1.1rem; margin-bottom: 2.5rem;
+  background: var(--white); font-size: 0.78rem; color: var(--text-muted);
+}
+.cite-strip-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--crimson); flex-shrink: 0; margin-top: 1px;
+}
+.cite-strip strong { display: block; color: var(--text); margin-bottom: 2px; font-size: 0.8rem; }
+
+/* ── PAGE LAYOUT ── */
+.page { max-width: var(--content-max); margin: 0 auto; padding: 3rem 1.5rem; }
+
+/* ── TOC removed ── */
+
+/* ── CONTENT ── */
+.content { width: 100%; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 3.5rem; scroll-margin-top: 76px; opacity: 0; transform: translateY(18px); transition: opacity 0.42s ease, transform 0.42s ease; }
+.section.visible { opacity: 1; transform: none; }
+
+.section-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 1.2rem; }
+.section-num {
+  font-family: 'Lora', serif; font-size: 36px; line-height: 1;
+  color: var(--ghost); font-weight: 600; flex-shrink: 0; margin-top: 0;
+  letter-spacing: -0.02em;
+}
+.section-title { padding-top: 3px; }
+.section-tag { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+.section h2 { font-family: 'Lora', serif; font-size: 1.45rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+.section-rule { width: 26px; height: var(--rule-ht); background: var(--crimson); border-radius: 1px; margin-top: 6px; }
+
+.section p { font-size: 0.95rem; color: var(--text-mid); line-height: 1.72; margin-bottom: 1rem; }
+.section p:last-child { margin-bottom: 0; }
+.section p strong { color: var(--text); font-weight: 600; }
+
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+
+/* ── RESEARCH CARD — quiet ── */
+.card-research {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tan-stripe);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.85rem 1.1rem;
+  margin: 1.1rem 0;
+}
+.card-research-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+.card-research p { font-size: 0.88rem; color: var(--text-mid); margin: 0; line-height: 1.6; }
+.card-research p em { font-style: italic; }
+.card-research p strong { color: var(--text); font-weight: 600; }
+
+/* ── TIP CARD — warm, stands out ── */
+.card-tip {
+  background: var(--tip-bg);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  margin: 1.1rem 0;
+}
+.card-tip-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--crimson); font-weight: 700; margin-bottom: 4px; }
+.card-tip p { font-size: 0.88rem; color: var(--tip-text); margin: 0; line-height: 1.62; font-style: italic; }
+.card-tip p strong { font-style: normal; color: var(--crimson-d); font-weight: 600; }
+
+/* ── SCRIPT BLOCK ── */
+.script {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.1rem 1.4rem; margin: 1.1rem 0;
+}
+.script-line { display: flex; gap: 12px; margin-bottom: 0.65rem; font-size: 0.9rem; }
+.script-line:last-child { margin-bottom: 0; }
+.script-speaker { font-weight: 600; color: var(--text-muted); font-size: 0.75rem; min-width: 76px; padding-top: 3px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+.script-text { color: var(--text-mid); font-style: italic; line-height: 1.55; }
+
+/* ── DO / DON'T ── */
+.dos-donts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.1rem 0; }
+.dd-col { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.dd-head { padding: 0.6rem 1rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; display: flex; align-items: center; gap: 6px; }
+.do-head  { background: #2d6a4f; color: rgba(255,255,255,0.92); }
+.dont-head { background: var(--crimson); color: rgba(255,255,255,0.92); }
+.dd-items { background: var(--white); }
+.dd-item { padding: 0.65rem 1rem; font-size: 0.85rem; color: var(--text-mid); border-bottom: 1px solid var(--border); line-height: 1.5; }
+.dd-item:last-child { border-bottom: none; }
+.dd-ref { font-size: 0.7rem; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px; }
+
+/* ── QUESTION TABS ── */
+.q-tabs { display: flex; gap: 6px; margin-bottom: 1.1rem; flex-wrap: wrap; }
+.q-tab {
+  padding: 0.42rem 1rem; border-radius: 99px; font-size: 0.82rem;
+  border: 1px solid var(--border); background: var(--white);
+  color: var(--text-muted); cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+  transition: all 0.15s;
+}
+.q-tab:hover { border-color: var(--crimson); color: var(--crimson); }
+.q-tab.active { background: var(--crimson); color: white; border-color: var(--crimson); }
+
+.q-panel { display: none; }
+.q-panel.active { display: block; }
+.q-desc { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 0.9rem; }
+
+.q-list { list-style: none; }
+.q-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--border);
+  font-size: 0.875rem; border-radius: 6px; transition: background 0.12s; cursor: default;
+}
+.q-item:last-child { border-bottom: none; }
+.q-item:hover { background: var(--tip-bg); }
+.q-n {
+  min-width: 22px; height: 22px; border-radius: 5px;
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: var(--text-muted);
+  flex-shrink: 0; margin-top: 1px;
+}
+.q-text { color: var(--text-mid); line-height: 1.5; flex: 1; }
+.q-star { margin-left: auto; color: var(--border); font-size: 1rem; cursor: pointer; padding: 0 4px; flex-shrink: 0; transition: color 0.15s, transform 0.15s; line-height: 1.4; }
+.q-star:hover { color: var(--crimson); transform: scale(1.2); }
+.q-star.on { color: #b87333; }
+
+.starred-note { margin-top: 1rem; padding: 0.7rem 1rem; background: var(--tip-bg); border-radius: 6px; font-size: 0.8rem; color: var(--tip-text); display: none; }
+.starred-note.on { display: block; }
+
+/* ── ENDING CARD ── */
+.ending-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; margin-top: 1rem; }
+.ending-card p { font-size: 0.93rem; color: var(--text-mid); margin: 0; line-height: 1.7; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .toc { display: none; }
+  .page { padding: 2rem 1rem; }
+  .dos-donts { grid-template-columns: 1fr; }
+  .hero { padding: 3.5rem 1.25rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-brand" href="#">
+    <div class="nav-dot"></div>
+    <span class="nav-name">Speed Dating Guide</span>
+  </a>
+  <span class="nav-tag">UA Social Psychology Lab</span>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-rail"><div class="progress-fill" id="prog"></div></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-ring hero-ring-1"></div>
+  <div class="hero-ring hero-ring-2"></div>
+  <div class="hero-ring hero-ring-3"></div>
+  <div class="hero-ring hero-ring-4"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <div class="hero-eyebrow-text">Research-Based Preparation Guide</div>
+      <div class="hero-eyebrow-line"></div>
+    </div>
+    <h1>Make the Most of Your <em>Speed Dating</em> Experience</h1>
+    <p class="hero-sub">Evidence-based strategies for presenting your best self, starting great conversations, and building genuine connections.</p>
+    <div class="hero-pills">
+      <span class="hero-pill">6 sections</span>
+      <span class="hero-pill">~5 min read</span>
+      <span class="hero-pill">Peer-reviewed research</span>
+      <span class="hero-pill">36 conversation questions</span>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- Cite strip -->
+    <div class="cite-strip">
+      <div class="cite-strip-dot"></div>
+      <div>
+        <strong>Research basis</strong>
+        Aron et al. (1997) · Brooks (2014) · Rentfrow &amp; Gosling (2006) · Rozin &amp; Royzman (2001) · Sezer et al. (2018) · Sprecher (2021) · Kardas et al. (2022)
+      </div>
+    </div>
+
+    <!-- ── S1 ── -->
+    <section class="section" id="s1">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">
+          <div class="section-tag">Section 1</div>
+          <h2>Getting Ready for the Date</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>Our appearance is the first thing people notice about us. We can't change our physical appearance, but we can improve first impressions by looking clean and put-together. Speed-dating events are <strong>not</strong> formal, but we encourage you to look your best and wear something that makes you feel confident and comfortable. Consider outfits that are flattering to features you consider your "best."</p>
+      <div class="card-tip">
+        <div class="card-tip-label">Tip</div>
+        <p>Research suggests smell has an important influence on attraction. Be sure to have fresh breath and wear a little cologne or perfume if you have it.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider"/>
+
+    <!-- ── S2 ── -->
+    <section class="section" id="s2">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">
+          <div class="section-tag">Section 2</div>
+          <h2>Pre-Date Nervousness</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>It is completely normal, and expected, to be a bit nervous before the speed-dating event. But thinking that we are nervous or anxious can make it difficult to relax and enjoy our conversations.</p>
+      <div class="card-research">
+        <div class="card-research-label">Excitement Reappraisal · Brooks (2014)</div>
+        <p>Instead of thinking <em>"I'm nervous,"</em> reframe it as excitement. Research has shown that reframing anxiety as excitement can make people more relaxed and confident — both states involve high arousal, so the mental shift is easier than it sounds.</p>
+      </div>
+      <div class="card-tip">
+        <div class="card-tip-label">Try this</div>
+        <p>Repeat assuring phrases to yourself before the dates — <strong>"I am excited to meet new people"</strong> — and think of speed-dating as an opportunity rather than an evaluation.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider"/>
+
+    <!-- ── S3 ── -->
+    <section class="section" id="s3">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">
+          <div class="section-tag">Section 3</div>
+          <h2>Beginning the Date — Introducing Yourself</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>Because speed-dating dates are "blind" dates, you will have to introduce yourself to each of your dates. This provides a great opportunity to start the date and guide the conversation. The following simple script provides a good template:</p>
+      <div class="script">
+        <div class="script-line">
+          <span class="script-speaker">Person A</span>
+          <span class="script-text">"Hi, I'm [name], it's nice to meet you!"</span>
+        </div>
+        <div class="script-line">
+          <span class="script-speaker">Person B</span>
+          <span class="script-text">"Hi, [Person A], I'm [name], it's nice to meet you too!"</span>
+        </div>
+      </div>
+      <div class="card-research">
+        <div class="card-research-label">Why this works</div>
+        <p>Saying your date's name back to them (1) helps you remember it and (2) demonstrates that you were listening — a small but meaningful signal of interest.</p>
+      </div>
+      <p>At this point, unless Person B begins the conversation, Person A is on the hook to start. One good option: give Person B a genuine, specific compliment while saying their name.</p>
+      <div class="card-tip">
+        <div class="card-tip-label">Tip</div>
+        <p>Don't give every one of your dates the same compliment — they may overhear each other, and it will no longer feel special. Only give compliments you truly mean and make them specific to the person.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider"/>
+
+    <!-- ── S4 ── -->
+    <section class="section" id="s4">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">
+          <div class="section-tag">Section 4</div>
+          <h2>During the Date — DOs and DON'Ts</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>Having a conversation with a complete stranger can be daunting. Below are research-informed suggestions for what to do and what to avoid.</p>
+      <div class="dos-donts">
+        <div class="dd-col">
+          <div class="dd-head do-head">✓ &nbsp;DO</div>
+          <div class="dd-items">
+            <div class="dd-item">Talk about more than demographics — share music taste, film preferences, hobbies, and notable experiences that signal your personality.<span class="dd-ref">Rentfrow &amp; Gosling, 2006</span></div>
+            <div class="dd-item">Be playful and make jokes. Don't take the conversation too seriously.</div>
+            <div class="dd-item">Maintain open body language — relaxed posture, lean in slightly, smile, and make eye contact.</div>
+            <div class="dd-item">Ask follow-up questions. Depth over breadth — it's better to go deep on one topic than skim many.</div>
+            <div class="dd-item">Be authentic. Let your genuine reactions show rather than performing for your date.</div>
+          </div>
+        </div>
+        <div class="dd-col">
+          <div class="dd-head dont-head">✗ &nbsp;DON'T</div>
+          <div class="dd-items">
+            <div class="dd-item">Interview your date. Fire off questions without reciprocating. Aim for a 50-50 balance between talking and listening.</div>
+            <div class="dd-item">Complain about your life, exes, or classes. Negativity is consistently off-putting.<span class="dd-ref">Rozin &amp; Royzman, 2001</span></div>
+            <div class="dd-item">Over-disclose or disclose too early. Mutual and gradual self-disclosure works best — jumping to deep secrets too soon backfires.</div>
+            <div class="dd-item">Bring up risky topics like politics, sex, or religion. Important to discuss eventually, but risky on a first date.</div>
+            <div class="dd-item">Humble brag. Subtly boasting about accomplishments often reads as inauthentic.<span class="dd-ref">Sezer et al., 2018</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider"/>
+
+    <!-- ── S5 ── -->
+    <section class="section" id="s5">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">
+          <div class="section-tag">Section 5</div>
+          <h2>During the Date — Escalating Self-Disclosure</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>While small talk is natural in speed-dating settings, research shows that <strong>escalating self-disclosure</strong> meaningfully increases interpersonal closeness. The questions below are organized into three levels. Work through them in order (Level 1 → 2 → 3) and take turns answering.</p>
+      <div class="card-research">
+        <div class="card-research-label">Aron et al. (1997) · Sprecher (2021)</div>
+        <p>The fast friends paradigm has extensive empirical support: partners who engage in escalating self-disclosure report significantly greater closeness than those who stick to small talk.</p>
+      </div>
+      <div class="card-tip">
+        <div class="card-tip-label">Before you go</div>
+        <p>Pick one or two questions from each level to bring with you. Write them down — it's completely fine if you spend the whole date on just one. <strong>Depth of conversation is often better than breadth.</strong></p>
+        <p style="margin-top:6px; font-size:0.8rem; color:var(--crimson-d); font-style:normal;">Tap ☆ to star questions you want to use.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="q-tabs">
+        <button class="q-tab active" onclick="switchTab('l1',this)">Level 1 — Light</button>
+        <button class="q-tab" onclick="switchTab('l2',this)">Level 2 — Moderate</button>
+        <button class="q-tab" onclick="switchTab('l3',this)">Level 3 — Deep</button>
+      </div>
+
+      <!-- L1 -->
+      <div class="q-panel active" id="l1">
+        <p class="q-desc">Imaginative, low-stakes questions that open conversation without requiring vulnerability.</p>
+        <ul class="q-list">
+          <li class="q-item"><span class="q-n">1</span><span class="q-text">Given the choice of anyone in the world, whom would you want as a dinner guest?</span><span class="q-star" onclick="star(this,'q1')">☆</span></li>
+          <li class="q-item"><span class="q-n">2</span><span class="q-text">Would you like to be famous? In what way?</span><span class="q-star" onclick="star(this,'q2')">☆</span></li>
+          <li class="q-item"><span class="q-n">3</span><span class="q-text">Before making a telephone call, do you ever rehearse what you are going to say? Why?</span><span class="q-star" onclick="star(this,'q3')">☆</span></li>
+          <li class="q-item"><span class="q-n">4</span><span class="q-text">What would constitute a "perfect" day for you?</span><span class="q-star" onclick="star(this,'q4')">☆</span></li>
+          <li class="q-item"><span class="q-n">5</span><span class="q-text">When did you last sing to yourself? To someone else?</span><span class="q-star" onclick="star(this,'q5')">☆</span></li>
+          <li class="q-item"><span class="q-n">6</span><span class="q-text">If you were able to live to the age of 90 and retain either the mind or body of a 30-year-old for the last 60 years of your life, which would you want?</span><span class="q-star" onclick="star(this,'q6')">☆</span></li>
+          <li class="q-item"><span class="q-n">7</span><span class="q-text">Do you have a secret hunch about how you will die?</span><span class="q-star" onclick="star(this,'q7')">☆</span></li>
+          <li class="q-item"><span class="q-n">8</span><span class="q-text">Name three things you and your partner appear to have in common.</span><span class="q-star" onclick="star(this,'q8')">☆</span></li>
+          <li class="q-item"><span class="q-n">9</span><span class="q-text">For what in your life do you feel most grateful?</span><span class="q-star" onclick="star(this,'q9')">☆</span></li>
+          <li class="q-item"><span class="q-n">10</span><span class="q-text">If you could change anything about the way you were raised, what would it be?</span><span class="q-star" onclick="star(this,'q10')">☆</span></li>
+          <li class="q-item"><span class="q-n">11</span><span class="q-text">Take 4 minutes and tell your partner your life story in as much detail as possible.</span><span class="q-star" onclick="star(this,'q11')">☆</span></li>
+          <li class="q-item"><span class="q-n">12</span><span class="q-text">If you could wake up tomorrow having gained any one quality or ability, what would it be?</span><span class="q-star" onclick="star(this,'q12')">☆</span></li>
+        </ul>
+      </div>
+
+      <!-- L2 -->
+      <div class="q-panel" id="l2">
+        <p class="q-desc">Moderate questions inviting reflection on values, memories, and what matters most to you.</p>
+        <ul class="q-list">
+          <li class="q-item"><span class="q-n">13</span><span class="q-text">If a crystal ball could tell you the truth about yourself, your life, the future, or anything else, what would you want to know?</span><span class="q-star" onclick="star(this,'q13')">☆</span></li>
+          <li class="q-item"><span class="q-n">14</span><span class="q-text">Is there something that you've dreamed of doing for a long time? Why haven't you done it?</span><span class="q-star" onclick="star(this,'q14')">☆</span></li>
+          <li class="q-item"><span class="q-n">15</span><span class="q-text">What is the greatest accomplishment of your life?</span><span class="q-star" onclick="star(this,'q15')">☆</span></li>
+          <li class="q-item"><span class="q-n">16</span><span class="q-text">What do you value most in a friendship?</span><span class="q-star" onclick="star(this,'q16')">☆</span></li>
+          <li class="q-item"><span class="q-n">17</span><span class="q-text">What is your most treasured memory?</span><span class="q-star" onclick="star(this,'q17')">☆</span></li>
+          <li class="q-item"><span class="q-n">18</span><span class="q-text">What is your most terrible memory?</span><span class="q-star" onclick="star(this,'q18')">☆</span></li>
+          <li class="q-item"><span class="q-n">19</span><span class="q-text">If you knew that in one year you would die suddenly, would you change anything about the way you are now living? Why?</span><span class="q-star" onclick="star(this,'q19')">☆</span></li>
+          <li class="q-item"><span class="q-n">20</span><span class="q-text">What does friendship mean to you?</span><span class="q-star" onclick="star(this,'q20')">☆</span></li>
+          <li class="q-item"><span class="q-n">21</span><span class="q-text">What roles do love and affection play in your life?</span><span class="q-star" onclick="star(this,'q21')">☆</span></li>
+          <li class="q-item"><span class="q-n">22</span><span class="q-text">Alternate sharing something you consider a positive characteristic of your partner. Share a total of 5 items.</span><span class="q-star" onclick="star(this,'q22')">☆</span></li>
+          <li class="q-item"><span class="q-n">23</span><span class="q-text">How close and warm is your family? Do you feel your childhood was happier than most other people's?</span><span class="q-star" onclick="star(this,'q23')">☆</span></li>
+          <li class="q-item"><span class="q-n">24</span><span class="q-text">How do you feel about your relationship with your mother?</span><span class="q-star" onclick="star(this,'q24')">☆</span></li>
+        </ul>
+      </div>
+
+      <!-- L3 -->
+      <div class="q-panel" id="l3">
+        <p class="q-desc">Deep questions inviting genuine vulnerability and mutual self-disclosure.</p>
+        <ul class="q-list">
+          <li class="q-item"><span class="q-n">25</span><span class="q-text">Make 3 true "we" statements each. For instance, "We are both in this room feeling..."</span><span class="q-star" onclick="star(this,'q25')">☆</span></li>
+          <li class="q-item"><span class="q-n">26</span><span class="q-text">Complete this sentence: "I wish I had someone with whom I could share..."</span><span class="q-star" onclick="star(this,'q26')">☆</span></li>
+          <li class="q-item"><span class="q-n">27</span><span class="q-text">If you were going to become a close friend with your partner, please share what would be important for her to know.</span><span class="q-star" onclick="star(this,'q27')">☆</span></li>
+          <li class="q-item"><span class="q-n">28</span><span class="q-text">Tell your partner what you like about them; be very honest this time, saying things that you might not say to someone you've just met.</span><span class="q-star" onclick="star(this,'q28')">☆</span></li>
+          <li class="q-item"><span class="q-n">29</span><span class="q-text">Share with your partner an embarrassing moment in your life.</span><span class="q-star" onclick="star(this,'q29')">☆</span></li>
+          <li class="q-item"><span class="q-n">30</span><span class="q-text">When did you last cry in front of another person? By yourself?</span><span class="q-star" onclick="star(this,'q30')">☆</span></li>
+          <li class="q-item"><span class="q-n">31</span><span class="q-text">Tell your partner something that you like about them already.</span><span class="q-star" onclick="star(this,'q31')">☆</span></li>
+          <li class="q-item"><span class="q-n">32</span><span class="q-text">What, if anything, is too serious to be joked about?</span><span class="q-star" onclick="star(this,'q32')">☆</span></li>
+          <li class="q-item"><span class="q-n">33</span><span class="q-text">If you were to die this evening with no opportunity to communicate with anyone, what would you most regret not having told someone? Why haven't you told them yet?</span><span class="q-star" onclick="star(this,'q33')">☆</span></li>
+          <li class="q-item"><span class="q-n">34</span><span class="q-text">Your house, containing everything you own, catches fire. After saving your loved ones and pets, you have time to safely make a final dash to save any one item. What would it be? Why?</span><span class="q-star" onclick="star(this,'q34')">☆</span></li>
+          <li class="q-item"><span class="q-n">35</span><span class="q-text">Of all the people in your family, whose death would you find most disturbing? Why?</span><span class="q-star" onclick="star(this,'q35')">☆</span></li>
+          <li class="q-item"><span class="q-n">36</span><span class="q-text">Share a personal problem and ask your partner's advice on how she might handle it. Also, ask your partner to reflect back to you how you seem to be feeling about the problem you have chosen.</span><span class="q-star" onclick="star(this,'q36')">☆</span></li>
+        </ul>
+      </div>
+
+      <div class="starred-note" id="starred-note">⭐ You've starred some questions — write them down to bring with you!</div>
+    </section>
+
+    <hr class="section-divider"/>
+
+    <!-- ── S6 ── -->
+    <section class="section" id="s6">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">
+          <div class="section-tag">Section 6</div>
+          <h2>Ending the Date</h2>
+          <div class="section-rule"></div>
+        </div>
+      </div>
+      <p>At the end of each date — once the timer goes off — tell your date how much you enjoyed talking to them.</p>
+      <div class="ending-card">
+        <p>If you felt a connection, mentioning that you'd love to talk to them or see them again can be flattering and validating. It gives them permission to select you without feeling like they're risking rejection alone.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('.section');
+const prog = document.getElementById('prog');
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.06 });
+sections.forEach(s => io.observe(s));
+
+window.addEventListener('scroll', () => {
+  const pct = Math.min(100, (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100);
+  prog.style.width = pct + '%';
+}, { passive: true });
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.q-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.q-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const starred = new Set();
+function star(el, id) {
+  event.stopPropagation();
+  if (starred.has(id)) { starred.delete(id); el.textContent = '☆'; el.classList.remove('on'); }
+  else { starred.add(id); el.textContent = '★'; el.classList.add('on'); }
+  document.getElementById('starred-note').classList.toggle('on', starred.size > 0);
+}
+</script>
+
+<!-- ── CHAT WIDGET ── -->
+<style>
+  /* FAB */
+  .chat-fab {
+    position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--crimson); color: white;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(158,27,50,0.35);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 22px;
+  }
+  .chat-fab:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(158,27,50,0.45); }
+  .chat-fab .fab-icon-open  { display: block; }
+  .chat-fab .fab-icon-close { display: none; }
+  .chat-fab.open .fab-icon-open  { display: none; }
+  .chat-fab.open .fab-icon-close { display: block; }
+
+  /* Unread badge */
+  .chat-badge {
+    position: absolute; top: -2px; right: -2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #e07a30; color: white;
+    font-size: 10px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--bg); display: none;
+  }
+  .chat-badge.on { display: flex; }
+
+  /* Window */
+  .chat-window {
+    position: fixed; bottom: 96px; right: 28px; z-index: 999;
+    width: 360px; height: 520px;
+    background: var(--white); border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.13);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transform: translateY(12px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    overflow: hidden;
+  }
+  .chat-window.open { opacity: 1; pointer-events: all; transform: none; }
+
+  /* Header */
+  .chat-header {
+    background: var(--crimson); color: white;
+    padding: 14px 16px 12px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+  }
+  .chat-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .chat-header-text {}
+  .chat-header-name { font-family: 'Lora', serif; font-size: 0.95rem; font-weight: 400; }
+  .chat-header-sub { font-size: 0.7rem; opacity: 0.75; margin-top: 1px; }
+
+  /* Messages */
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 14px 14px 8px;
+    display: flex; flex-direction: column; gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .chat-msg { display: flex; flex-direction: column; max-width: 85%; }
+  .chat-msg.bot { align-self: flex-start; }
+  .chat-msg.user { align-self: flex-end; }
+  .chat-bubble {
+    padding: 9px 13px; border-radius: 14px;
+    font-size: 0.855rem; line-height: 1.55;
+  }
+  .chat-msg.bot  .chat-bubble { background: #f4f0ec; color: var(--text-mid); border-radius: 4px 14px 14px 14px; }
+  .chat-msg.user .chat-bubble { background: var(--crimson); color: white; border-radius: 14px 4px 14px 14px; }
+  .chat-msg-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; padding: 0 4px; }
+  .chat-msg.user .chat-msg-time { text-align: right; }
+
+  /* Typing indicator */
+  .typing-bubble { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
+  .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); animation: typingPulse 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingPulse { 0%,80%,100% { opacity: 0.3; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1); } }
+
+  /* Input */
+  .chat-input-row {
+    padding: 10px 12px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; border: 1px solid var(--border); border-radius: 20px;
+    padding: 8px 14px; font-size: 0.86rem; font-family: 'DM Sans', sans-serif;
+    color: var(--text); background: var(--bg); resize: none; outline: none;
+    max-height: 100px; line-height: 1.45;
+    transition: border-color 0.15s;
+  }
+  .chat-input:focus { border-color: var(--crimson); }
+  .chat-input::placeholder { color: var(--text-muted); }
+  .chat-send {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--crimson); color: white; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.15s, transform 0.15s;
+    font-size: 14px;
+  }
+  .chat-send:hover { background: var(--crimson-d); transform: scale(1.06); }
+  .chat-send:disabled { background: var(--border); cursor: default; transform: none; }
+
+  /* Suggested prompts */
+  .chat-suggestions {
+    padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0;
+  }
+  .chat-suggestion {
+    font-size: 0.75rem; color: var(--crimson); border: 1px solid rgba(158,27,50,0.25);
+    border-radius: 99px; padding: 4px 11px; cursor: pointer; background: none;
+    font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .chat-suggestion:hover { background: var(--tip-bg); }
+
+  @media (max-width: 480px) {
+    .chat-window { width: calc(100vw - 24px); right: 12px; bottom: 88px; }
+    .chat-fab { bottom: 20px; right: 20px; }
+  }
+</style>
+
+<!-- FAB Button -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Ask a question">
+  <span class="chat-badge" id="chatBadge">1</span>
+  <span class="fab-icon-open">💬</span>
+  <span class="fab-icon-close">✕</span>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-avatar">✦</div>
+    <div class="chat-header-text">
+      <div class="chat-header-name">Speed Dating Assistant</div>
+      <div class="chat-header-sub">Ask me anything about the guide</div>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <!-- Intro message injected by JS -->
+  </div>
+
+  <div class="chat-suggestions" id="chatSuggestions">
+    <button class="chat-suggestion" onclick="useSuggestion(this)">What should I wear?</button>
+    <button class="chat-suggestion" onclick="useSuggestion(this)">How do I start conversation?</button>
+    <button class="chat-suggestion" onclick="useSuggestion(this)">I'm really nervous</button>
+    <button class="chat-suggestion" onclick="useSuggestion(this)">Which questions should I pick?</button>
+  </div>
+
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask anything..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+      oninput="autoResize(this)"></textarea>
+    <button class="chat-send" id="chatSend" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  const WORKER_URL = 'https://speed-dating-chat.hallbradent.workers.dev';
+  const LOG_URL    = 'https://script.google.com/macros/s/AKfycbzqvt06fz84PZ4NDnaNUfcpmrce7FtX8o0xhmLCfvhNp4HQk8RVLXEWrHW23lOY85Qatg/exec';
+
+  const SYSTEM_PROMPT = `You are a friendly, knowledgeable assistant embedded in a speed dating preparation guide created by the University of Alabama Social Psychology Lab. Your role is to help participants prepare for their upcoming speed dating event.
+
+You can:
+- Answer questions about the guide content (appearance, nervousness, self-disclosure, conversation tips, the 36 questions, etc.)
+- Give practical, encouraging advice about speed dating in general
+- Help participants think through which conversation questions to use
+- Help them reframe nerves as excitement (per Brooks, 2014)
+- Be a sounding board if they want to talk through their feelings about the event
+
+Keep responses warm, concise, and practical — usually 2–4 sentences. This is a research study at the University of Alabama. Do not discuss topics unrelated to speed dating, dating preparation, or the guide content. If asked about the study itself, say you're not able to discuss study details and direct them to the research team.`;
+
+  const history = [];
+  let messageCount = 0;
+  let chatOpened = false;
+
+  // Get participant ID from URL param if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const participantId = urlParams.get('pid') || 'unknown';
+
+  // Logging
+  function log(eventType) {
+    fetch(LOG_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        participant_id: participantId,
+        event: eventType,
+        message_count: messageCount
+      })
+    }).catch(() => {});
+  }
+
+  // Render initial bot message
+  function init() {
+    addBotMessage("Hi! I'm here to help you get ready for your speed dating event. Ask me anything about the guide, conversation tips, or what to expect tonight. 😊");
+    // Show badge to draw attention
+    document.getElementById('chatBadge').classList.add('on');
+  }
+
+  // Toggle chat open/close
+  window.toggleChat = function() {
+    const win = document.getElementById('chatWindow');
+    const fab = document.getElementById('chatFab');
+    const badge = document.getElementById('chatBadge');
+    const isOpen = win.classList.toggle('open');
+    fab.classList.toggle('open', isOpen);
+    badge.classList.remove('on');
+    if (isOpen && !chatOpened) {
+      chatOpened = true;
+      log('chat_opened');
+    }
+    if (isOpen) document.getElementById('chatInput').focus();
+  };
+
+  // Suggestion chips
+  window.useSuggestion = function(btn) {
+    document.getElementById('chatInput').value = btn.textContent;
+    document.getElementById('chatSuggestions').style.display = 'none';
+    sendMessage();
+  };
+
+  // Auto-resize textarea
+  window.autoResize = function(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  };
+
+  // Add messages to UI
+  function addBotMessage(text) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg bot';
+    div.innerHTML = `<div class="chat-bubble">${text}</div><div class="chat-msg-time">${timeNow()}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addUserMessage(text) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg user';
+    div.innerHTML = `<div class="chat-bubble">${escHtml(text)}</div><div class="chat-msg-time">${timeNow()}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg bot'; div.id = 'typingIndicator';
+    div.innerHTML = `<div class="chat-bubble typing-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  // Send message
+  window.sendMessage = async function() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Hide suggestions after first message
+    document.getElementById('chatSuggestions').style.display = 'none';
+
+    addUserMessage(text);
+    input.value = ''; input.style.height = 'auto';
+    document.getElementById('chatSend').disabled = true;
+
+    history.push({ role: 'user', content: text });
+    messageCount++;
+    log('message_sent');
+
+    showTyping();
+
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          max_tokens: 300,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...history
+          ]
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const errMsg = data?.error?.message || `API error ${res.status}`;
+        removeTyping();
+        addBotMessage(`⚠️ API error: ${errMsg}`);
+      } else {
+        const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't get a response. Please try again.";
+        history.push({ role: 'assistant', content: reply });
+        removeTyping();
+        addBotMessage(reply.replace(/\n/g, '<br>'));
+      }
+    } catch(err) {
+      removeTyping();
+      addBotMessage('⚠️ Error: ' + err.message);
+    }
+
+    document.getElementById('chatSend').disabled = false;
+    document.getElementById('chatInput').focus();
+  };
+
+  function timeNow() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
