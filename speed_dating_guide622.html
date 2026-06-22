@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Speed Dating Guide · UA Social Psychology Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; margin: 0; }
+
+:root {
+  --bg:        #faf8f2;
+  --warm-bg:   #f5f0e6;
+  --crimson:   #9E1B32;
+  --crimson-d: #7a1426;
+  --text:      #1e1408;
+  --text-mid:  #3a3020;
+  --text-sub:  #7a6840;
+  --text-mute: #9c8050;
+  --text-meta: #b0a080;
+  --border:    #ede5d5;
+  --tip-bg:    #edddd2;
+  --ghost:     #e0cfb0;
+}
+
+/* ── CHROME ── */
+.band {
+  background: var(--crimson);
+  padding: 8px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.band-l { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; }
+.band-r { font-size: 8px; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; }
+
+.nav {
+  padding: 12px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.nav-brand { font-family: 'Lora', serif; font-size: 13px; color: var(--text); }
+.nav-right { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-mute); font-weight: 600; }
+
+/* ── GUIDE PAGE ── */
+.gp { background: var(--bg); width: 100%; border-radius: 0; overflow: hidden; }
+.gp-body { max-width: 760px; margin: 0 auto; }
+
+.gp-hero {
+  padding: 36px 28px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.gp-hero-inner, .nav-inner { max-width: 760px; margin: 0 auto; }
+.eyebrow { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--crimson); font-weight: 600; margin-bottom: 16px; }
+.gp-h1 { font-family: 'Lora', serif; font-size: 32px; font-weight: 400; color: var(--text); line-height: 1.1; }
+.gp-h1 em { font-style: italic; }
+
+.gp-meta { display: flex; gap: 0; border-top: 1px solid var(--border); margin-top: 20px; }
+.gp-meta-item { flex: 1; padding: 8px 0; text-align: center; }
+.gp-meta-item + .gp-meta-item { border-left: 1px solid var(--border); }
+.gp-meta-n { font-family: 'Lora', serif; font-size: 20px; color: var(--text); line-height: 1; }
+.gp-meta-l { font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-mute); font-weight: 600; margin-top: 1px; }
+
+/* ── BODY ── */
+.gp-body { padding: 22px 28px; }
+.gp-body > * + * { margin-top: 18px; }
+
+.sec-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-mute); font-weight: 600;
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 32px !important;
+}
+.sec-label::before { content: ''; flex: 1; height: 1px; background: var(--border); }
+.sec-label::after  { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.gp-h2 { font-family: 'Lora', serif; font-size: 24px; font-weight: 400; color: var(--text); line-height: 1.2; }
+.gp-h2 em { font-style: italic; color: var(--crimson); }
+
+.gp-h3 { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; color: var(--text-mid); line-height: 1.3; }
+.gp-h3 em { font-style: italic; font-weight: 400; }
+
+.gp-p { font-family: 'Lora', serif; font-size: 14px; color: var(--text-mid); line-height: 1.88; }
+
+.gp-quote { padding: 14px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.gp-quote-cite { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-meta); font-weight: 600; margin-bottom: 6px; }
+.gp-quote p { font-family: 'Lora', serif; font-size: 15px; font-style: italic; color: var(--text); line-height: 1.6; margin: 0; }
+
+.tip {
+  background: var(--tip-bg);
+  border: 1.5px solid var(--crimson);
+  border-radius: 4px; padding: 11px 14px;
+  box-shadow: 4px 4px 0 var(--crimson);
+}
+.tip-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--crimson); font-weight: 700; margin-bottom: 5px; }
+.tip p { font-family: 'DM Sans', sans-serif; font-size: 13px; color: #3e2018; margin: 0; line-height: 1.65; font-style:; }
+.tip p + p { margin-top: 6px; }
+
+.detail { display: flex; align-items: flex-start; gap: 8px; }
+.detail-mark { color: var(--crimson); font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px; line-height: 1.55; }
+.detail-text { font-family: 'Lora', serif; font-size: 14px; color: #4a3c20; line-height: 1.55; font-style:; }
+.detail-text strong { font-style: normal; font-weight: 600; color: var(--text-mid); }
+
+.details-list { display: flex; flex-direction: column; gap: 8px; }
+
+.gp-divider { border: none; border-top: 1px solid var(--border); }
+
+/* ── SCRIPT TABLE ── */
+.script-table { width: 100%; border-collapse: collapse; font-family: 'Lora', serif; font-size: 12px; color: var(--text-mid); }
+.script-table th {
+  background: var(--crimson); color: white;
+  font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 600; padding: 8px 14px; text-align: left;
+}
+.script-table td { padding: 12px 14px; border: 1px solid var(--border); line-height: 1.7; vertical-align: top; }
+.script-table tr:nth-child(even) td { background: var(--warm-bg); }
+
+/* ── DO/DON'T TABLE ── */
+.ddt-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ddt-col { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.ddt-head {
+  font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+  font-weight: 700; padding: 7px 14px;
+}
+.ddt-head.do { background: var(--crimson); color: white; }
+.ddt-head.dont { background: var(--text); color: rgba(255,255,255,0.7); }
+.ddt-item { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); }
+.ddt-item:first-of-type { border-top: none; }
+.ddt-mark { font-size: 12px; flex-shrink: 0; margin-top: 2px; }
+.ddt-mark.check { color: var(--crimson); }
+.ddt-mark.cross { color: var(--text-mute); }
+.ddt-item p { font-family: 'Lora', serif; font-size: 13px; color: var(--text-mid); line-height: 1.65; }
+.ddt-item p .cite { font-size: 10px; color: var(--text-mute); font-style: italic; }
+
+/* ── LEVEL QUESTIONS ── */
+.levels { display: flex; flex-direction: column; gap: 14px; }
+.level-block { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.level-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; background: var(--warm-bg);
+  border-bottom: 1px solid var(--border);
+}
+.level-n { font-family: 'Lora', serif; font-size: 22px; color: var(--ghost); font-weight: 600; line-height: 1; }
+.level-label { font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-mute); font-weight: 600; }
+.level-questions { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.level-q { font-family: 'Lora', serif; font-size: 12px; color: var(--text-mid); line-height: 1.6; display: flex; gap: 8px; }
+.level-q::before { content: '—'; color: var(--ghost); font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="gp">
+
+  <div class="band">
+    <div class="band-l">UA Social Cognition Lab · Speed Dating Guide</div>
+    <div class="band-r"></div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+      <div class="nav-brand">Speed Dating Guide</div>
+      <div class="nav-right">UA Speed Dating Study</div>
+    </div>
+  </div>
+
+  <div class="gp-hero">
+    <div class="gp-hero-inner">
+    <div class="eyebrow">Make the Most of Your Speed Dating Experience</div>
+    <div class="gp-h1">Research-Based Preparation Guide</div>
+    <div class="gp-meta">
+    
+    </div>
+  </div><!-- /gp-hero-inner -->
+  </div><!-- /gp-hero -->
+
+  <div class="gp-body">
+
+    <!-- ══════════════════════════════════
+         BEFORE THE EVENT
+    ══════════════════════════════════ -->
+
+    <div class="sec-label">Before the Event</div>
+
+    <div class="gp-h2">Getting Ready <em>for the Event</em></div>
+
+    <div class="gp-p">Our appearance is the first thing people notice about us and has a large effect on dating success. We can improve our appearances by looking clean and put-together. Our speed-dating events are not especially formal, but we encourage you to look your best and wear something that makes you feel confident and comfortable. Additionally, consider outfits that are flattering to features that you consider to be your "best." We also suggest that you wear a little bit of cologne or perfume if you have it as research suggests that smell has an important influence on attraction.</div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2">Pre-Date <em>Nervousness</em></div>
+
+    <div class="gp-p">
+      <p>It is completely normal, and expected, to be a bit nervous before the speed-dating event. But, thinking that we are nervous or anxious can make it difficult to relax and enjoy our conversations. Instead, think of any nervousness as excitement. Research has shown that reframing anxiety as excitement can make people more relaxed and confident.</p>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>You can try repeating assuring phrases to yourself before the dates (e.g., "I am excited to meet new people.") and think of the speed-dating as an opportunity.</p>
+    </div>
+
+    <!-- ══════════════════════════════════
+         DURING THE EVENT
+    ══════════════════════════════════ -->
+
+    <div class="sec-label">During the Event</div>
+
+    <div class="gp-h2">Making a Good First Impression</div>
+
+    <div class="gp-p">Because speed-dating dates are "blind" dates, you will have to introduce yourself to each of your dates. This provides an opportunity to make a good first impression. Research has shown that we form first impressions very quickly, and those impressions are often hard to change. So, it's important to start your date strong so that you increase your chances of making a positive first impression. Below are some tips that cover the time from first meeting your date to beginning conversation.</div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2"><em>Introducing Yourself</em></div>
+
+    <div class="gp-p">When introducing yourself to your date (or responding to your date's introduction), consider using the following simple script as a template for the conversation.</div>
+
+    <table class="script-table">
+      <thead>
+        <tr>
+          <th>If you introduce yourself first</th>
+          <th>If they introduce themselves first</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>You: "Hi, I'm [your name], it's nice to meet you!"<br>Them: "Hi, I'm [their name], nice to meet you too!"<br>You: "Hi, [their name]…"<br><br>At this point, you are now on the hook to begin the conversation. Below we offer several different ways to begin the conversation.</td>
+          <td>Them: "Hi, I'm [your name], it's nice to meet you!"<br>You: "Hi [their name], I'm [their name], nice to meet you too!"<br><br>At this point, your date is on the hook to begin the conversation; however, you can also continue speaking when introducing yourself to begin the conversation using the tips below.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>Saying your date's name during introductions helps you remember it and demonstrates that you were listening to them.</p>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2"><em>Beginning Conversation</em></div>
+
+    <div class="gp-p">There are many ways to begin a conversation with your date. Having a strong start to the conversation can improve your date's impressions of you, can help relax both you and your date, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into real conversation. Consider a few that you might like to try.</div>
+
+    <div class="details-list">
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Compliment-to-question:</strong> After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question to avoid a simple "Thank you" in return. E.g., "That is a really cool shirt, where'd you get it?" or if someone is wearing something with a certain topic on it (e.g., a band name), you can compliment it and then ask about the topic. E.g., "I like that shirt, are you a big Braves fan?"</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Make an observation:</strong> A low-stakes way to establish common ground in a conversation is to make an observation about the situation. For instance, you may ask your date if they've done speed-dating before, if they saw someone's funky shoes, or how the event is going for them so far.</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Meta-framing:</strong> Sometimes breaking out of the typical script people expect their dates to follow can seem exciting and refreshing. To do this, you might tell your date that you want to avoid the typical speed-dating conversation and really get to know them (e.g., "These dates always feel like an interview, we can skip the small talk and pick something more interesting if you're down?").</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Organic topic escalation:</strong> If your date mentions something about themselves during their introduction (e.g., "I'm from Colorado."), you can use that as a bridge to the question (e.g., "Oh cool, do you like to ski?").</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Get straight to the point:</strong> Sometimes, being direct is the best approach. After introductions, you may simply ask your date if you can ask them a random question and go from there.</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>Don't give every one of your dates the same compliment. They may overhear and it will no longer feel special. Instead, only give compliments that you truly mean and make them specific to the person.</p>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2">Continuing Conversation</div>
+
+    <div class="gp-p">Once you've gotten off on the right foot, it's important to keep the momentum throughout your date. Below are some tips on what to do and not do during your date followed by some research-backed ideas on how to have better conversations.</div>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>Research suggests that traveling is one of the best things to talk about on a first date. So, if you find yourself searching for conversation topics, ask your date if they've been on any trips recently or are planning any soon. Then, ask follow-up questions based on their answer. (e.g., "New York sounds exciting! What are you most looking forward to?")</p>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2">During the Date <em>DOs</em> and <em>DON'Ts</em></div>
+
+    <div class="gp-p">Having a conversation with a complete stranger can be daunting. Below are some suggestions of DOs and DON'Ts for your date.</div>
+
+    <div class="ddt-wrap">
+      <div class="ddt-col">
+        <div class="ddt-head do">DO</div>
+        <div class="ddt-item"><div class="ddt-mark check">✓</div><p><strong>Talk about more than just demographic information</strong> (e.g., major, career plans, what you did today). Talk about things that signal your personality such as music taste, film preferences, unique hobbies, notable experiences.</p></div>
+        <div class="ddt-item"><div class="ddt-mark check">✓</div><p><strong>Be playful and make jokes.</strong> Don't take the conversation too seriously.</p></div>
+        <div class="ddt-item"><div class="ddt-mark check">✓</div><p><strong>Maintain open and inviting body language.</strong> Keep an open and relaxed posture, lean in slightly, smile and make eye contact.</p></div>
+        <div class="ddt-item"><div class="ddt-mark check">✓</div><p><strong>Seem interested in what your date is saying and avoid letting your attention wander.</strong> Ask follow-up questions. It is usually better to have a deeper conversation about one or two topics than shallower conversations about several topics. Ask follow-up questions when your date shares information about themselves (e.g., if your date mentions that they run, ask if they are training for any races and what that's like).</p></div>
+        <div class="ddt-item"><div class="ddt-mark check">✓</div><p><strong>Be authentic.</strong> Let your genuine reactions show rather than performing or acting for your date.</p></div>
+      </div>
+      <div class="ddt-col">
+        <div class="ddt-head dont">DON'T</div>
+        <div class="ddt-item"><div class="ddt-mark cross">✗</div><p>Interview your date. Many people fire off questions to their date without reciprocating. Try and keep a 50-50 balance between talking and listening during the date. Try playing conversational tennis.</p></div>
+        <div class="ddt-item"><div class="ddt-mark cross">✗</div><p>Complain. Negativity is often off-putting, so avoid complaining about your life, exes, classes, etc. </p></div>
+        <div class="ddt-item"><div class="ddt-mark cross">✗</div><p>Over-disclose or disclose too early. As we will discuss below, mutual and gradual self-disclosure is beneficial. But doing so too early (e.g., introducing yourself and then asking your partner to share an embarrassing moment) can backfire.</p></div>
+        <div class="ddt-item"><div class="ddt-mark cross">✗</div><p>Bring up risky topics (e.g., politics, sex, religion). While these topics are important to discuss later, discussing them on the first date is risky.</p></div>
+        <div class="ddt-item"><div class="ddt-mark cross">✗</div><p>Humble brag. It's understandable that you want to share accomplishments and skills to seem attractive, but trying to do so in a "humble" way often comes across fails to make people seem humble (e.g., "I'm really stressed with all the internship offers I'm getting.")</p></div>
+      </div>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2">Nonverbal <em>Behavior Tips</em></div>
+
+    <div class="details-list">
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Smile and look friendly.</strong> No one wants to talk to someone who seems unhappy to be meeting them. Maintaining a friendly and uplifting demeanor can help people feel relaxed and warm.</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Maintain open body language.</strong> When we meet people for the first time, our brains quickly size the person up to determine whether they are safe, trustworthy, interesting, etc. Keeping your arms and legs uncrossed, maintaining eye contact, and adopting a relaxed posture can make your date feel more comfortable.</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>Engage in "immediacy behaviors." Immediacy behaviors are verbal and nonverbal behaviors meant to reduce psychological distance and signal warmth and closeness. Some common immediacy behaviors include eye contact, nodding while listening to your date, smiling, and leaning forward a little toward your date.</p>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2"><em>Being Responsive</em></div>
+
+    <div class="gp-p">No two people are exactly alike, so none of your dates will be exactly alike. Because of this, it's important to be responsive to the unique personality of your date. A good dater "knows their audience" and adjusts their approach accordingly.</div>
+
+    <div class="details-list">
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Does your date seem shy?</strong> If so, try and be reassuring or share that you are often shy in these situations, too (if it's true). You can switch out the questions you ask your date for questions to accommodate someone who is less comfortable with a lot of self-disclosure. Or, you can ask more follow-up questions about something they seem comfortable talking about.</div>
+      </div>
+      <div class="detail">
+        <div class="detail-mark">→</div>
+        <div class="detail-text"><strong>Does your date seem nervous?</strong> If so, share with them that you are nervous, too (if you are). You both might talk about what about dating makes you nervous, which provides an opportunity for you to help ease your date's anxiety. For instance, your date might mention that they are nervous that they wore the wrong outfit. If you think their outfit looks good, this is a perfect opportunity to tell them, which can boost their confidence.</div>
+      </div>
+    </div>
+
+    <hr class="gp-divider"/>
+
+    <div class="gp-h2">Help! <em>I'm not very attracted to my date!</em></div>
+
+    <div class="gp-p">It is likely that you will be more immediately attracted to some dates more than others. However, many successful couples report that they were not super attracted to their partner in the beginning. So, even if you don't feel an immediate spark, give your date a chance and try and get to know them. You might realize you like them more than you thought you would.</div>
+
+    <!-- ══════════════════════════════════
+         ESCALATING SELF-DISCLOSURE
+    ══════════════════════════════════ -->
+
+    <div class="sec-label">Escalating Self-Disclosure</div>
+
+    <div class="gp-h2">Going <em>Deeper</em></div>
+
+    <div class="gp-quote">
+      <div class="gp-quote-cite">Aron et al. (1997) Fast Friends Paradigm · Supported by Sprecher (2021)</div>
+      <p>While small talk (e.g., sharing personal facts such as major and career goals) is natural in speed-dating settings, research suggests that escalating self-disclosure increases interpersonal closeness. The following question sets are examples of escalating self-disclosure. The process works best if partners answer at least one question from each level in order (i.e., Level 1 → Level 2 → Level 3) and take turns answering each question.</p>
+    </div>
+
+    <div class="gp-p">Below are some example questions. We encourage you to review these questions and then generate some similar questions of your own that you might want to ask your dates so people don't hear the same questions from multiple dates.</div>
+
+    <div class="tip">
+      <div class="tip-label">Tip</div>
+      <p>Before your speed-date, come up with a couple questions that you might ask your partner. Perhaps have some of your own "Level 1," "Level 2," and "Level 3" questions, depending on how the conversation is going. It is OK if you and your partner end up talking about one question the entire time. In fact, depth of conversation is often better than breadth of conversation. <span style="font-style:normal; font-size:10px; color:#7a6840;">(Kardas et al., 2022; strangers tend to enjoy deep conversation)</span></p>
+    </div>
+
+    <div class="levels">
+      <div class="level-block">
+        <div class="level-head">
+          <div class="level-n">1</div>
+          <div class="level-label">Level 1 — Lighter Questions</div>
+        </div>
+        <div class="level-questions">
+          <div class="level-q">Given the choice of anyone in the world, whom would you want as a dinner guest?</div>
+          <div class="level-q">Would you like to be famous? In what way?</div>
+          <div class="level-q">What would constitute a "perfect" day for you?</div>
+          <div class="level-q">For what in your life do you feel most grateful?</div>
+        </div>
+      </div>
+      <div class="level-block">
+        <div class="level-head">
+          <div class="level-n">2</div>
+          <div class="level-label">Level 2 — Getting Deeper</div>
+        </div>
+        <div class="level-questions">
+          <div class="level-q">If a crystal ball could tell you the truth about yourself, your life, the future, or anything else, what would you want to know?</div>
+          <div class="level-q">Is there something that you've dreamed of doing for a long time? Why haven't you done it?</div>
+          <div class="level-q">What is the greatest accomplishment of your life?</div>
+          <div class="level-q">Alternate sharing something you consider a positive characteristic of your partner. Share a total of 5 items.</div>
+        </div>
+      </div>
+      <div class="level-block">
+        <div class="level-head">
+          <div class="level-n">3</div>
+          <div class="level-label">Level 3 — Most Personal</div>
+        </div>
+        <div class="level-questions">
+          <div class="level-q">If you were going to become a close friend with your partner, please share what would be important for them to know.</div>
+          <div class="level-q">Tell your partner something that you like about them already.</div>
+          <div class="level-q">Your house, containing everything you own, catches fire. After saving your loved ones and pets, you have time to safely make a final dash to save any one item. What would it be? Why?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         MICROCULTURE
+    ══════════════════════════════════ -->
+
+    <div class="sec-label">Creating Connection</div>
+
+    <div class="gp-h2">Creating a <em>"Microculture"</em></div>
+
+    <div class="gp-p">Another effective strategy that increases closeness between people is the development of you and your date's "own little world." While this is difficult to develop over the course of just a few minutes, you can try and find unique things that you and your date have in common (e.g., "No way, I'm a middle child, too!") or make shared observations (e.g., "Did you see that guys mustache?"). This can create a special relationship between you and your date that other people can't replicate. But be sure that it is indeed unique to your date (i.e., don't make the same observation for every date).</div>
+
+    <!-- ══════════════════════════════════
+         END OF DATE
+    ══════════════════════════════════ -->
+
+    <div class="sec-label">The End of the Date</div>
+
+    <div class="gp-h2">Ending <em>on a High Note</em></div>
+
+    <div class="gp-p">When the timer goes off at the end of your date, instead of just moving on, you can take the last few moments with your date to give them a compliment, mention how much you enjoyed talking to them, or, if you felt a connection with your date, mention how you would love to talk to them or see them again sometime (e.g., "You were really fun to talk to" or "You're really funny. I hope we can see each other again."). All of these things can be flattering and validating to your date, but make sure you actually mean them and they are relevant to the conversation you just had.</div>
+
+  </div><!-- /gp-body -->
+
+</div><!-- /gp -->
+
+</body>
+</html>
