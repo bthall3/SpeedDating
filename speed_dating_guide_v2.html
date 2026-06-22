@@ -131,7 +131,7 @@ body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; marg
 
 /* ── CAROUSEL ── */
 .carousel { position: relative; }
-.carousel-track { display: flex; overflow: hidden; border-radius: 4px; }
+.carousel-track { display: flex; }
 .carousel-slide {
   min-width: 100%; padding: 22px 22px 20px;
   background: var(--warm-bg); border: 1px solid var(--border);
@@ -209,6 +209,58 @@ body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; marg
   transition: opacity 0.45s ease, transform 0.45s ease;
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── HAMBURGER ── */
+.hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
+}
+.hamburger span {
+  display: block; width: 20px; height: 2px;
+  background: var(--text); border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── OVERLAY ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(30,20,8,0.4);
+  z-index: 97;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.visible { display: block; }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 240px; }
+
+  .hamburger { display: flex; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 98;
+    top: 0;
+    padding-top: calc(var(--chrome-h) + 16px);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .page-wrap { margin-left: 0; }
+
+  .gp-hero { padding: 24px 20px 20px; }
+  .gp-hero-inner { max-width: 100%; }
+  .gp-body { padding: 24px 20px 80px; max-width: 100%; }
+
+  .ddt-wrap { grid-template-columns: 1fr; }
+
+  .script-table { font-size: 11px; }
+  .script-table td, .script-table th { padding: 8px 10px; }
+}
 </style>
 </head>
 <body>
@@ -221,9 +273,15 @@ body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; marg
 
 <!-- FIXED NAV -->
 <div class="nav">
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
   <div class="nav-brand">Speed Dating Guide</div>
   <div class="nav-right">UA Speed Dating Study</div>
 </div>
+
+<!-- OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -317,7 +375,7 @@ body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; marg
 
     <!-- CAROUSEL -->
     <div class="carousel reveal">
-      <div class="carousel-track" id="carouselTrack">
+      <div style="overflow:hidden; border-radius:4px;"><div class="carousel-track" id="carouselTrack">
         <div class="carousel-slide">
           <div class="carousel-num">1</div>
           <div class="carousel-content">
@@ -353,7 +411,7 @@ body { background: #faf8f2; font-family: 'DM Sans', sans-serif; padding: 0; marg
             <div class="carousel-text">Sometimes, being direct is the best approach. After introductions, you may simply ask your date if you can ask them a random question and go from there.</div>
           </div>
         </div>
-      </div>
+      </div></div>
       <div class="carousel-controls">
         <button class="carousel-btn" id="prevBtn" disabled>← Prev</button>
         <div class="carousel-dots" id="carouselDots"></div>
@@ -591,6 +649,34 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: '0px 0px -60px 0px' });
 
 revealEls.forEach(el => revealObserver.observe(el));
+
+// ── HAMBURGER ──
+const hamburger = document.getElementById('hamburger');
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  overlay.classList.add('visible');
+  hamburger.classList.add('open');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('visible');
+  hamburger.classList.remove('open');
+}
+
+hamburger.addEventListener('click', () => {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+overlay.addEventListener('click', closeSidebar);
+
+// Close sidebar when a link is tapped on mobile
+document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
 </script>
 </body>
 </html>
