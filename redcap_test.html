@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>REDCap Test</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 0 20px; }
+    label { display: block; margin-top: 16px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; font-size: 14px; }
+    button { margin-top: 24px; padding: 10px 24px; background: #9E1B32; color: white; border: none; cursor: pointer; font-size: 16px; }
+    button:hover { background: #7a1526; }
+    pre { margin-top: 20px; background: #f4f4f4; padding: 12px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h2>REDCap Import Test</h2>
+
+  <label>Participant ID</label>
+  <input type="text" id="record_id" placeholder="e.g. P001" />
+
+  <label>Email</label>
+  <input type="email" id="email" placeholder="e.g. student@ua.edu" />
+
+  <button onclick="sendRecord()">Send to REDCap</button>
+  <pre id="result">Result will appear here...</pre>
+
+  <script>
+    // Capture page load time immediately when page opens
+    const pageLoadTime = new Date();
+
+    function formatDateTime(dt) {
+      return dt.getFullYear() + '-'
+        + String(dt.getMonth()+1).padStart(2,'0') + '-'
+        + String(dt.getDate()).padStart(2,'0') + ' '
+        + String(dt.getHours()).padStart(2,'0') + ':'
+        + String(dt.getMinutes()).padStart(2,'0') + ':00';
+    }
+
+    async function sendRecord() {
+      const record_id = document.getElementById('record_id').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!record_id || !email) {
+        document.getElementById('result').textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      const submitTime = new Date();
+      const timeOnPageSeconds = Math.round((submitTime - pageLoadTime) / 1000);
+
+      document.getElementById('result').textContent = 'Sending...';
+
+      try {
+        const response = await fetch('https://redcap.bthall3.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            records: [{
+              record_id,
+              email,
+              module_start_time: formatDateTime(pageLoadTime),
+              module_submit_time: formatDateTime(submitTime),
+              time_on_page_seconds: timeOnPageSeconds
+            }]
+          })
+        });
+
+        const result = await response.json();
+        document.getElementById('result').textContent = JSON.stringify(result, null, 2);
+
+      } catch (err) {
+        document.getElementById('result').textContent = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
