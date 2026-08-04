@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Speed Dating - UA Department of Psychology</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #faf8f2;
+  color: #1e1408;
+  line-height: 1.7;
+}
+
+/* ── BAND ── */
+.band {
+  background: #9E1B32;
+  padding: 8px 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.band-l { font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 600; }
+.band-r { font-size: 0.7rem; color: rgba(255,255,255,0.42); letter-spacing: 0.06em; }
+
+/* ── NAV ── */
+.nav {
+  padding: 14px 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid #ede5d5;
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,248,242,0.95);
+  backdrop-filter: blur(12px);
+}
+.nav-brand { font-family: 'Lora', serif; font-size: 0.9rem; color: #1e1408; text-decoration: none; }
+.nav-cta {
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #9E1B32; font-weight: 600;
+  border-bottom: 1px solid #9E1B32; padding-bottom: 1px;
+  text-decoration: none; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.nav-cta:hover { opacity: 0.7; }
+
+/* ── HERO ── */ 
+.hero {
+  padding: 2rem 2.5rem 1rem;
+  border-bottom: 1px solid #ede5d5;
+  position: relative; overflow: hidden;
+  max-width: 860px; margin: 0 auto;
+}
+/* Soft ambient orb */
+.hero-orb {
+  position: absolute; width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(158,27,50,0.05), transparent 70%);
+  top: -150px; right: -120px; pointer-events: none; filter: blur(40px);
+}
+.hero-orb-2 {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,150,60,0.04), transparent 70%);
+  bottom: -80px; left: -60px; pointer-events: none; filter: blur(30px);
+}
+
+.hero-eyebrow {
+  font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #9E1B32; font-weight: 600; margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.hero-h1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 400; color: #1e1408;
+  line-height: 1.08; letter-spacing: -0.02em;
+  margin-bottom: 1.6rem;
+  position: relative; max-width: 680px;
+}
+.hero-h1 em { font-style: italic; }
+
+.hero-sub {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: #7a6840; line-height: 1.65;
+  margin-bottom: 2.5rem;
+  max-width: 520px; position: relative;
+}
+
+/* CTA group */
+.hero-cta-group {
+  display: flex; align-items: center; gap: 1.25rem;
+  margin-bottom: 2.25rem; position: relative;
+  flex-wrap: wrap;
+}
+.hero-btn {
+  display: inline-block;
+  background: #9E1B32; color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 15px 32px; border-radius: 3px;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 5px 5px 0 rgba(158,27,50,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.hero-btn:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 rgba(158,27,50,0.3); }
+.hero-btn:active { transform: translate(1px,1px); box-shadow: 3px 3px 0 rgba(158,27,50,0.3); }
+.hero-btn-note {
+  font-family: 'Lora', serif; font-size: 0.82rem;
+  font-style: italic; color: #9c8050; line-height: 1.45;
+}
+
+/* Trust row */
+.hero-trust { display: flex; gap: 1.25rem; flex-wrap: wrap; position: relative; }
+.trust-item {
+  font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #9c8060; display: flex; align-items: center; gap: 5px;
+}
+.trust-item::before { content: '✓'; color: #9E1B32; font-weight: 700; font-size: 0.7rem; }
+
+/* ── WHAT TO EXPECT ── */
+.expect { max-width: 860px; margin: 0 auto; padding: 4rem 2.5rem; border-bottom: 1px solid #ede5d5; }
+
+.section-label {
+  font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #9c8050; font-weight: 600; margin-bottom: 2rem;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: #ede5d5; }
+
+.expect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.expect-item {
+  padding: 1.5rem 1.5rem 1.5rem 0;
+  border-top: 1px solid #ede5d5;
+}
+.expect-item:nth-child(even) { padding-left: 1.5rem; border-left: 1px solid #ede5d5; }
+.expect-n {
+  font-family: 'Lora', serif; font-size: 2.2rem;
+  color: #e0cfb0; font-weight: 600;
+  line-height: 1; margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+.expect-text {
+  font-family: 'Lora', serif; font-size: 0.95rem;
+  color: #5a4428; line-height: 1.6;
+}
+.expect-text em { font-style: italic; color: #3a2818; }
+
+/* ── DETAILS ── */
+.details { max-width: 860px; margin: 0 auto; padding: 2rem 2rem; border-bottom: 1px solid #ede5d5; }
+
+.detail-list { display: flex; flex-direction: column; gap: 1rem; }
+.detail {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding-bottom: 1rem; border-bottom: 1px solid #ede5d5;
+}
+.detail:last-child { border-bottom: none; padding-bottom: 0; }
+.detail-arrow { color: #9E1B32; font-size: 0.9rem; font-weight: 700; flex-shrink: 0; margin-top: 3px; font-family: 'DM Sans', sans-serif; }
+.detail-text {
+  font-family: 'Lora', serif; font-size: 1rem;
+  color: #3a3020; line-height: 1.6;
+}
+.detail-text em { font-style: italic; }
+
+/* ── BOTTOM CTA ── */
+.bottom-cta {
+  max-width: 860px; margin: 0 auto;
+  padding: 5rem 2.5rem 6rem;
+  text-align: center;
+}
+.bottom-cta-eyebrow {
+  font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #9c8050; font-weight: 600; margin-bottom: 1.25rem;
+}
+.bottom-cta-h2 {
+  font-family: 'Lora', serif; font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-weight: 400; color: #1e1408; line-height: 1.2;
+  margin-bottom: 2rem; letter-spacing: -0.01em;
+}
+.bottom-cta-h2 em { font-style: italic; }
+.bottom-btn {
+  display: inline-block;
+  background: #9E1B32; color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 15px 36px; border-radius: 3px;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 5px 5px 0 rgba(158,27,50,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.bottom-btn:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 rgba(158,27,50,0.3); }
+
+/* ── FOOTER ── */
+.footer {
+  border-top: 1px solid #ede5d5;
+  padding: 1.5rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+}
+.footer-l { font-family: 'Lora', serif; font-size: 0.8rem; font-style: italic; color: #9c8050; }
+.footer-r { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: #c0b090; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .band { padding: 8px 1.25rem; }
+  .nav { padding: 12px 1.25rem; }
+  .hero { padding: 4rem 1.25rem 3.5rem; }
+  .expect { padding: 3rem 1.25rem; }
+  .expect-grid { grid-template-columns: 1fr; }
+  .expect-item:nth-child(even) { padding-left: 0; border-left: none; }
+  .details { padding: 2.5rem 1.25rem; }
+  .bottom-cta { padding: 3.5rem 1.25rem 4.5rem; }
+  .footer { padding: 1.25rem; }
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- Band -->
+<div class="band">
+  <div class="band-l">University of Alabama Department of Psychology Speed Dating Study</div>
+  <div class="band-r"></div>
+</div>
+
+<!-- Nav -->
+<nav class="nav">
+  <a class="nav-brand" href="#"></a>
+  <a class="nav-cta" href="https://universityofalabama.az1.qualtrics.com/jfe/form/SV_03uJY7XSuRrbC3s">Sign Up →</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-orb"></div>
+  <div class="hero-orb-2"></div>
+  <div class="hero-eyebrow"></div>
+  <h1 class="hero-h1">Tired of apps?<br>Meet someone the<br><em>old-fashioned way.</em></h1>
+  <p class="hero-sub">Sign up for the Department of Psychology's Speed Dating Event and Study and meet other single students while helping us understand human connection.</p>
+  <div class="hero-cta-group">
+    <a class="hero-btn" href="https://universityofalabama.az1.qualtrics.com/jfe/form/SV_03uJY7XSuRrbC3s">Sign Up Now</a>
+    <div class="hero-btn-note">Complete the recruitment and eligibility survey<br>and be on the lookout for a confirmation email.</div>
+  
+</section>
+
+<!-- Details -->
+<section class="details reveal">
+  <div class="detail-list">
+    <div class="detail">
+      <div class="detail-arrow">→</div>
+      <div class="detail-text">Free to attend</div>
+    </div>
+    <div class="detail">
+      <div class="detail-arrow">→</div>
+      <div class="detail-text">Light refreshments provided</div>
+    </div>
+    <div class="detail">
+      <div class="detail-arrow">→</div>
+      <div class="detail-text">Open to all students 18+</div>
+    </div>
+    <div class="detail">
+      <div class="detail-arrow">→</div>
+      <div class="detail-text">Receive matches' contact information</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  
+  <div class="footer-r">IRB Approved <br>Questions? Contact Braden Hall bthall3@crimson.ua.edu</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
