@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Event Check-In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --maroon: #9E1B32;
+    --cream: #faf8f2;
+    --ink: #2a2420;
+    --muted: #8a8078;
+    --border: #e4ddd2;
+    --error: #b3261e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 0 var(--maroon);
+    max-width: 680px;
+    width: 100%;
+    padding: 48px 40px;
+  }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--maroon);
+    margin: 0 0 8px;
+  }
+
+  .subtext {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 32px;
+  }
+
+  label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  input[type="email"] {
+    width: 100%;
+    padding: 16px 18px;
+    font-size: 18px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 24px;
+  }
+
+  input[type="email"]:focus {
+    outline: none;
+    border-color: var(--maroon);
+  }
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: 120px repeat(5, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grid-row:first-of-type {
+    border-top: 1px solid var(--border);
+  }
+
+  .grid-label {
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .scale-header {
+    display: grid;
+    grid-template-columns: 120px repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .scale-header span {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .tap-target {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: white;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: all 0.15s ease;
+  }
+
+  .tap-target.selected {
+    background: var(--maroon);
+    border-color: var(--maroon);
+    color: white;
+  }
+
+  button.primary {
+    width: 100%;
+    background: var(--maroon);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 18px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    margin-top: 32px;
+  }
+
+  button.primary:disabled {
+    background: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .error-msg {
+    color: var(--error);
+    font-size: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .hidden { display: none; }
+
+  .confirm-screen {
+    text-align: center;
+  }
+
+  .confirm-name {
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    color: var(--ink);
+    margin: 24px 0 4px;
+  }
+
+  .confirm-pid {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 64px;
+    color: var(--maroon);
+    letter-spacing: 2px;
+    margin: 0 0 32px;
+  }
+
+  .confirm-instruction {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- Screen 1: email + state items -->
+  <div id="screen-form">
+    <h1>Welcome — check in</h1>
+    <p class="subtext">Enter your email, then rate how you feel right now.</p>
+
+    <label for="email">Email address</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+
+    <div class="scale-header">
+      <span></span>
+      <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+    </div>
+    <div id="grid-container"></div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="primary" id="submit-btn" disabled>Check In</button>
+  </div>
+
+  <!-- Screen 2: confirmation -->
+  <div id="screen-confirm" class="confirm-screen hidden">
+    <h1>You're checked in</h1>
+    <div class="confirm-name" id="confirm-name"></div>
+    <div class="confirm-pid" id="confirm-pid"></div>
+    <div class="confirm-instruction">
+      Show this ID to a research assistant — it goes on your nametag.
+    </div>
+    <button class="primary" onclick="location.reload()">Done — Next Person</button>
+  </div>
+
+</div>
+
+<script>
+  const WORKER_URL = "https://checkin.bthall3.workers.dev"; // update to your actual deployed Worker URL
+
+  const items = [
+    { key: "state_nervous", label: "Nervous" },
+    { key: "state_anxious", label: "Anxious" },
+    { key: "state_confident", label: "Confident" },
+    { key: "state_optimistic", label: "Optimistic" },
+    { key: "state_excited", label: "Excited" },
+    { key: "state_calm", label: "Calm" },
+    { key: "state_ready", label: "Ready" }
+  ];
+
+  const responses = {};
+  const gridContainer = document.getElementById("grid-container");
+  const emailInput = document.getElementById("email");
+  const submitBtn = document.getElementById("submit-btn");
+  const errorMsg = document.getElementById("error-msg");
+
+  // Build the rating grid
+  items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "grid-row";
+
+    const label = document.createElement("div");
+    label.className = "grid-label";
+    label.textContent = item.label;
+    row.appendChild(label);
+
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement("button");
+      btn.className = "tap-target";
+      btn.textContent = i;
+      btn.type = "button";
+      btn.addEventListener("click", () => {
+        responses[item.key] = i;
+        // Clear other selections in this row, mark this one
+        row.querySelectorAll(".tap-target").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        checkComplete();
+      });
+      row.appendChild(btn);
+    }
+
+    gridContainer.appendChild(row);
+  });
+
+  function checkComplete() {
+    const emailFilled = emailInput.value.trim().length > 3 && emailInput.value.includes("@");
+    const allItemsAnswered = items.every(item => responses[item.key] !== undefined);
+    submitBtn.disabled = !(emailFilled && allItemsAnswered);
+  }
+
+  emailInput.addEventListener("input", checkComplete);
+
+  submitBtn.addEventListener("click", async () => {
+    errorMsg.style.display = "none";
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>Checking in...';
+
+    try {
+      const res = await fetch(`${WORKER_URL}/check-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: emailInput.value.trim(),
+          ...responses
+        })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorMsg.textContent = data.error || "Something went wrong. Ask a research assistant for help.";
+        errorMsg.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Check In";
+        return;
+      }
+
+      document.getElementById("confirm-name").textContent = data.first_name || "";
+      document.getElementById("confirm-pid").textContent = data.pid;
+      document.getElementById("screen-form").classList.add("hidden");
+      document.getElementById("screen-confirm").classList.remove("hidden");
+
+    } catch (err) {
+      errorMsg.textContent = "Couldn't connect. Check the network and try again, or ask a research assistant.";
+      errorMsg.style.display = "block";
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Check In";
+    }
+  });
+</script>
+
+</body>
+</html>
