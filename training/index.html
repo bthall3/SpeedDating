@@ -224,6 +224,353 @@ body {
   line-height: 1.6;
 }
 
+.loading {
+  text-align: center;
+  padding: 100px 20px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .hero-h1 { font-size: 32px; }
+  .node { width: 44px; height: 44px; font-size: 15px; margin-top: 10px; }
+  .path::before { left: 21px; }
+  .card { padding: 16px 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="app">
+    <div class="loading">Loading your training...</div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG — connect this to the real Worker once /resolve-token exists.
+   Nothing here is guessed at beyond "the endpoint returns JSON shaped like
+   this." Rename keys on the right to match real REDCap field names, not
+   the other way around.
+
+   EXPECTED RESPONSE from GET {endpoint}?t=<token>:
+   {
+     "pid": "M203",
+     "first_name": "Alex",
+     "condition": "practice",          // "control" | "review" | "practice"
+     "module1_complete": 1,            // 0 or 1
+     "module2_complete": 0,
+     "module3_complete": 0,
+     "module4_complete": 0,
+     "module5_complete": 0,
+     "module6_complete": 0,
+     "module7_complete": 0
+   }
+   A missing token and an invalid token should return the SAME generic
+   "not found" response — don't let this page distinguish them.
+   ========================================================================= */
+const CONFIG = {
+  endpoint: "https://redcap.bthall3.workers.dev/resolve-token",   // TODO: confirm real route
+  conditionField: "condition",
+  moduleFieldPrefix: "module",
+  demoMode: false   // live: pulling real data from /resolve-token
+};
+
+const MODULES = [
+  { n: 1, title: "Getting Ready",          desc: "Settling nerves and setting your mindset before the event.",        href: "module-1.html",  condition: "all" },
+  { n: 2, title: "Introducing Yourself",   desc: "Openers that feel natural, not rehearsed.",                          href: "module-2.html",  condition: "all" },
+  { n: 3, title: "Making Conversation",    desc: "Keeping a conversation moving and finding real common ground.",      href: "module-3.html",  condition: "all" },
+  { n: 4, title: "Nonverbal Behavior",     desc: "What your posture, eye contact, and tone are already saying.",       href: "module-4.html",  condition: "all" },
+  { n: 5, title: "Additional Tips",        desc: "Small adjustments that make a noticeable difference.",               href: "module-5.html",  condition: "all" },
+  { n: 6, title: "Ending Your Dates",      desc: "Closing a conversation with warmth, clearly and on time.",           href: "module-6.html",  condition: "all" },
+  { n: 7, title: "Planning & Practice",    desc: "Run through a full mock date and get feedback before the real one.", href: "practice-chat.html", condition: "practice" }
+];
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+
+function getDemoData() {
+  return {
+    pid: "M203",
+    first_name: "Alex",
+    condition: "practice",
+    module1_complete: 1,
+    module2_complete: 1,
+    module3_complete: 0,
+    module4_complete: 0,
+    module5_complete: 0,
+    module6_complete: 0,
+    module7_complete: 0
+  };
+}
+
+async function resolveToken(token) {
+  if (CONFIG.demoMode) return getDemoData();
+  try {
+    const res = await fetch(`${CONFIG.endpoint}?t=${encodeURIComponent(token)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("resolve-token failed:", err);
+    return null;
+  }
+}
+
+function renderEmptyState(message, submessage) {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <section class="empty-state">
+      <div class="empty-eyebrow">Before the Event</div>
+      <h2 class="empty-h2">${message}</h2>
+      <p class="empty-sub">${submessage}</p>
+    </section>
+  `;
+}
+
+function renderDashboard(token, data) {
+  const app = document.getElementById("app");
+
+  const condition = data[CONFIG.conditionField];
+  const visible = MODULES.filter(m => m.condition === "all" || m.condition === condition);
+
+  let currentAssigned = false;
+  const rows = visible.map(m => {
+    const complete = !!data[`${CONFIG.moduleFieldPrefix}${m.n}_complete`];
+    let state = "locked";
+    if (complete) {
+      state = "complete";
+    } else if (!currentAssigned) {
+      state = "current";
+      currentAssigned = true;
+    }
+
+    const label = state === "complete" ? "Complete" : state === "current" ? "Start module" : "Locked";
+    const tag = m.condition !== "all" ? `<div class="card-tag">Planning &amp; Practice track</div>` : "";
+    const marker = state === "complete" ? "&#10003;" : String(m.n).padStart(2, "0");
+    const clickable = state !== "locked";
+    const tagName = clickable ? "a" : "div";
+    const hrefAttr = clickable ? `href="${m.href}?token=${encodeURIComponent(token)}"` : "";
+
+    return `
+      <${tagName} class="card-row is-${state}" ${hrefAttr}>
+        <div class="node">${marker}</div>
+        <div class="card">
+          <div class="card-title">${m.title}</div>
+          <div class="card-desc">${m.desc}</div>
+          ${tag}
+          <div class="card-status">${label}</div>
+        </div>
+      </${tagName}>
+    `;
+  }).join("");
+
+  const completeCount = visible.filter(m => data[`${CONFIG.moduleFieldPrefix}${m.n}_complete`]).length;
+  const pct = visible.length ? Math.round((completeCount / visible.length) * 100) : 0;
+
+  app.innerHTML = `
+    <section class="hero">
+      ${data.first_name ? `<div class="hero-greeting">Hi, ${data.first_name}</div>` : ""}
+      <div class="hero-eyebrow">Before the Event</div>
+      <h1 class="hero-h1">A little preparation<br><em>goes a long way.</em></h1>
+      <p class="hero-sub">Work through each module in order. You can leave and come back — your progress is saved automatically.</p>
+      <div class="meter">
+        <div class="meter-top">
+          <span>${completeCount} of ${visible.length} complete</span>
+          <span>${pct}%</span>
+        </div>
+        <div class="meter-track"><div class="meter-fill" style="width:${pct}%"></div></div>
+      </div>
+    </section>
+    <div class="path">
+      ${rows}
+    </div>
+  `;
+}
+
+(async function init() {
+  const token = getToken();
+  if (!token && !CONFIG.demoMode) {
+    renderEmptyState(
+      "This link looks incomplete.",
+      "Please use the link from your training email to access your modules."
+    );
+    return;
+  }
+
+  const data = await resolveToken(token);
+  if (!data) {
+    renderEmptyState(
+      "We couldn't find that link.",
+      "Please use the link from your training email again, or contact the research team."
+    );
+    return;
+  }
+
+  if (data[CONFIG.conditionField] === "control") {
+    renderEmptyState(
+      "No training assigned.",
+      "Your participation track doesn't include pre-event modules. We'll see you at the event."
+    );
+    return;
+  }
+
+  renderDashboard(token || "DEMO", data);
+})();
+</script>
+
+</body>
+</html>  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.meter-track {
+  height: 5px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Module path */
+.path { position: relative; }
+.path::before {
+  content: "";
+  position: absolute;
+  left: 27px;
+  top: 8px;
+  bottom: 8px;
+  width: 1.5px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.card-row {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 6px;
+}
+
+.node {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--locked);
+  margin-top: 12px;
+  transition: all 0.2s ease;
+}
+
+.card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-title {
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.card-desc {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.card-tag {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--crimson);
+}
+.card-status {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+/* States */
+.is-complete .node {
+  background: var(--crimson);
+  border-color: var(--crimson);
+  color: #fff;
+}
+.is-complete .card-status { color: var(--crimson-soft); }
+
+.is-current .node {
+  border-color: var(--crimson);
+  color: var(--crimson);
+  box-shadow: 0 0 0 4px rgba(158,27,50,0.09);
+}
+.is-current .card {
+  border-color: var(--crimson);
+  box-shadow: 0 6px 20px rgba(158,27,50,0.07);
+}
+.is-current .card-status { color: var(--crimson); }
+.card-row.is-current:hover .card { transform: translateX(2px); }
+
+.is-locked .card { opacity: 0.55; }
+.is-locked .card-status { color: var(--locked); }
+.is-locked { cursor: default; }
+
+/* Empty / error state */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+.empty-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+.empty-h2 {
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  font-size: 26px;
+  margin: 0 0 12px;
+}
+.empty-sub {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  max-width: 40ch;
+  margin: 0 auto 28px;
+  line-height: 1.6;
+}
+
 .resend-form {
   display: flex;
   gap: 8px;
