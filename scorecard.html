@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scorecard Entry</title>
+<style>
+  :root {
+    --ink: #1A1A1A;
+    --line: #2A2A2A;
+    --line-soft: #C7C7C2;
+    --bg: #FFFFFF;
+    --page: #EAEAE7;
+    --accent: #2E6F6B;
+    --no: #B3392F;
+    --warn-soft: #FBEAE8;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--ink);
+    color: #fff;
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  header .left { display: flex; align-items: center; gap: 16px; }
+  header .title { font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; opacity: 0.75; }
+  header .ra-name { font-size: 13px; font-weight: 700; }
+  header .counter { font-size: 10px; opacity: 0.55; }
+
+  header .event-badge { display: flex; align-items: center; gap: 10px; }
+  header .event-badge .num {
+    font-family: "SF Mono", monospace;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.12);
+    padding: 3px 9px;
+    border-radius: 5px;
+  }
+  header .change-event { font-size: 11px; text-decoration: underline; opacity: 0.7; }
+
+  /* Portrait guidance overlay -- design is built for landscape iPad use */
+  .rotate-hint {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(20,20,20,0.94);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px;
+    font-family: -apple-system, sans-serif;
+  }
+
+  .rotate-hint .box { max-width: 320px; }
+  .rotate-hint .icon { font-size: 40px; margin-bottom: 14px; }
+  .rotate-hint h2 { font-size: 17px; margin: 0 0 8px; }
+  .rotate-hint p { font-size: 13px; opacity: 0.75; margin: 0; }
+
+  @media (orientation: portrait) {
+    .rotate-hint { display: flex; }
+  }
+
+  main {
+    max-width: 1060px;
+    margin: 14px auto 130px;
+    padding: 0 14px;
+  }
+
+  .sheet {
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    padding: 18px 22px;
+  }
+
+  .top-row {
+    display: flex;
+    gap: 30px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1.5px solid var(--line);
+    flex-wrap: wrap;
+  }
+
+  .id-field {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .id-field label {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .id-field input {
+    flex: 1;
+    border: none;
+    border-bottom: 1.5px solid var(--ink);
+    background: transparent;
+    font-family: "SF Mono", monospace;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 2px 4px;
+    text-transform: uppercase;
+    color: var(--ink);
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  .id-field input:focus { outline: none; background: #F5F5F5; }
+  .id-field input.error { border-bottom-color: var(--no); background: var(--warn-soft); }
+
+  .instruction {
+    font-size: 14px;
+    margin: 14px 0 8px;
+  }
+
+  table.scorecard {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px 5px;
+    table-layout: fixed;
+    margin-bottom: 4px;
+  }
+
+  table.scorecard th {
+    font-family: -apple-system, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+    padding: 2px 0 4px;
+  }
+
+  table.scorecard td.label,
+  table.scorecard th.label-head {
+    text-align: left;
+    padding: 0 8px;
+    font-size: 13.5px;
+    width: 26%;
+  }
+
+  table.scorecard tbody tr.error td.label {
+    color: var(--no);
+    font-weight: 700;
+  }
+
+  table.scorecard td.cell {
+    height: 46px;
+    font-family: "SF Mono", monospace;
+    font-size: 14px;
+    color: #888;
+    cursor: pointer;
+    border: 1.5px solid var(--line-soft);
+    border-radius: 8px;
+    background: #FBFBFA;
+    text-align: center;
+  }
+
+  table.scorecard td.cell.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .traits-table { margin-bottom: 20px; }
+
+  .choice-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1.5px solid var(--line);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .choice-block .q {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .choice-row { display: flex; gap: 10px; }
+
+  .choice-btn {
+    min-width: 100px;
+    height: 48px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    background: #fff;
+    font-family: -apple-system, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .choice-btn.yes.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .choice-btn.no.selected { background: var(--no); border-color: var(--no); color: #fff; }
+
+  .submit-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1.5px solid var(--line);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    z-index: 20;
+    font-family: -apple-system, sans-serif;
+  }
+
+  .submit-bar .inner { max-width: 1060px; margin: 0 auto; }
+
+  #submitBtn {
+    width: 100%;
+    height: 52px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  #submitBtn:disabled { background: #A8B0BA; }
+
+  #statusMsg { text-align: center; font-size: 12px; margin-top: 7px; min-height: 15px; }
+  #statusMsg.success { color: var(--accent); font-weight: 700; }
+  #statusMsg.error { color: var(--no); font-weight: 700; }
+
+  .event-modal {
+    position: fixed; inset: 0; background: rgba(20,20,20,0.6);
+    z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px;
+    font-family: -apple-system, sans-serif;
+  }
+  .event-modal.hidden { display: none; }
+  .event-modal .box { background: #fff; border-radius: 10px; padding: 22px; width: 100%; max-width: 340px; }
+  .event-modal h2 { font-size: 14px; margin: 0 0 14px; }
+  .event-modal .field { margin-bottom: 12px; }
+  .event-modal .field label {
+    display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; color: #666; margin-bottom: 5px;
+  }
+  .event-modal input {
+    width: 100%; font-family: -apple-system, sans-serif; font-size: 17px; font-weight: 700;
+    padding: 11px 12px; border: 2px solid var(--line-soft); border-radius: 7px;
+    -webkit-user-select: text; user-select: text;
+  }
+  .event-modal input#eventInput {
+    font-family: "SF Mono", monospace; text-align: center; font-size: 20px;
+  }
+  .event-modal button {
+    width: 100%; height: 48px; background: var(--accent); color: #fff; border: none;
+    border-radius: 7px; font-size: 14px; font-weight: 700; margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="rotate-hint">
+  <div class="box">
+    <div class="icon">&#8635;</div>
+    <h2>Turn the iPad sideways</h2>
+    <p>This scorecard is designed for landscape orientation so ratings are easier to tap.</p>
+  </div>
+</div>
+
+<header>
+  <div class="left">
+    <div>
+      <div class="title">Scorecard Entry</div>
+      <div class="ra-name" id="raNameDisplay">RA: —</div>
+    </div>
+    <div class="counter" id="counterText">0 entered this session</div>
+  </div>
+  <div class="event-badge">
+    <span class="num" id="eventDisplay">—</span>
+    <span class="change-event" id="changeEventBtn">change</span>
+  </div>
+</header>
+
+<main>
+  <div class="sheet">
+
+    <div class="top-row">
+      <div class="id-field">
+        <label for="raterId">Your ID:</label>
+        <input type="text" id="raterId" placeholder="M203" maxlength="10">
+      </div>
+      <div class="id-field">
+        <label for="partnerId">Date ID:</label>
+        <input type="text" id="partnerId" placeholder="F108" maxlength="10">
+      </div>
+    </div>
+
+    <div class="instruction">Rate your date on the following traits on a scale of 1 (not at all like them) to 10 (extremely)</div>
+    <table class="scorecard traits-table" id="traitsTable">
+      <thead>
+        <tr>
+          <th class="label-head"></th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+          <th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="instruction">Rate your agreement with the following statements on a scale of 1 (strongly disagree) to 7 (strongly agree)</div>
+    <table class="scorecard" id="statementsTable">
+      <thead>
+        <tr>
+          <th class="label-head"></th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="choice-block">
+      <div class="q">Would you like to see your date again?</div>
+      <div class="choice-row">
+        <button class="choice-btn yes" id="choiceYes">Yes</button>
+        <button class="choice-btn no" id="choiceNo">No</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="submit-bar">
+  <div class="inner">
+    <button id="submitBtn">Submit Scorecard</button>
+    <div id="statusMsg"></div>
+  </div>
+</div>
+
+<div class="event-modal" id="eventModal">
+  <div class="box">
+    <h2>Set up this iPad</h2>
+    <div class="field">
+      <label for="raNameInput">RA Name</label>
+      <input type="text" id="raNameInput" placeholder="e.g. Jordan Smith">
+    </div>
+    <div class="field">
+      <label for="eventInput">Event Number</label>
+      <input type="text" id="eventInput" placeholder="e.g. 3" inputmode="numeric">
+    </div>
+    <button id="eventSaveBtn">Start Entering Scorecards</button>
+  </div>
+</div>
+
+<script>
+  // ---- CONFIG ----
+  // TODO: replace with the deployed Worker endpoint once /scorecard/submit exists
+  const SUBMIT_ENDPOINT = "https://scorecard-submit.YOURSUBDOMAIN.workers.dev/submit";
+
+  const TRAITS = [
+    ["attractive", "Physically attractive"],
+    ["funny", "Funny"],
+    ["kind", "Kind"],
+    ["outgoing", "Outgoing"],
+    ["mystery", "Mysterious"],
+    ["smooth", "Smooth"],
+    ["dominant", "Dominant"],
+    ["confident", "Confident"],
+    ["authentic", "Authentic"],
+    ["charismatic", "Charismatic"]
+  ];
+
+  const STATEMENTS = [
+    ["liked", "I liked my date"],
+    ["attract_to", "I am physically attracted to my date"],
+    ["romantic", "I am romantically attracted to my date"],
+    ["common", "My date and I seemed to have a lot in common"],
+    ["chem", "My date and I had \u201cchemistry\u201d"],
+    ["interest", "My date seemed interested in me"],
+    ["open", "My date opened up to me"],
+    ["attract_me", "I think my date was attracted to me"],
+    ["nervous_date", "My date seemed nervous"],
+    ["nervous_me", "I was nervous interacting with my date"]
+  ];
+
+  let state = { traits: {}, statements: {}, choice: null };
+
+  function buildTable(tbody, items, max, bucket) {
+    items.forEach(([field, label]) => {
+      const tr = document.createElement("tr");
+      tr.dataset.field = field;
+
+      const labelTd = document.createElement("td");
+      labelTd.className = "label";
+      labelTd.textContent = label;
+      tr.appendChild(labelTd);
+
+      for (let i = 1; i <= max; i++) {
+        const td = document.createElement("td");
+        td.className = "cell";
+        td.textContent = i;
+        td.addEventListener("click", () => {
+          tr.querySelectorAll("td.cell").forEach(c => c.classList.remove("selected"));
+          td.classList.add("selected");
+          tr.classList.remove("error");
+          bucket[field] = i;
+        });
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  buildTable(document.querySelector("#traitsTable tbody"), TRAITS, 10, state.traits);
+  buildTable(document.querySelector("#statementsTable tbody"), STATEMENTS, 7, state.statements);
+
+  const choiceYes = document.getElementById("choiceYes");
+  const choiceNo = document.getElementById("choiceNo");
+  choiceYes.addEventListener("click", () => {
+    state.choice = 1;
+    choiceYes.classList.add("selected");
+    choiceNo.classList.remove("selected");
+  });
+  choiceNo.addEventListener("click", () => {
+    state.choice = 0;
+    choiceNo.classList.add("selected");
+    choiceYes.classList.remove("selected");
+  });
+
+  // ---- SESSION SETUP (RA name + event number) ----
+  const eventModal = document.getElementById("eventModal");
+  const eventDisplay = document.getElementById("eventDisplay");
+  const eventInput = document.getElementById("eventInput");
+  const raNameInput = document.getElementById("raNameInput");
+  const raNameDisplay = document.getElementById("raNameDisplay");
+  const counterText = document.getElementById("counterText");
+
+  function getEvent() { return localStorage.getItem("scorecard_event"); }
+  function getRAInput() { return localStorage.getItem("scorecard_ra_input"); }
+  function getCount() { return parseInt(localStorage.getItem("scorecard_count") || "0", 10); }
+
+  function refreshHeader() {
+    const ev = getEvent();
+    const ra = getRAInput();
+    eventDisplay.textContent = ev ? `Event ${ev}` : "—";
+    raNameDisplay.textContent = ra ? `RA: ${ra}` : "RA: —";
+    counterText.textContent = `${getCount()} entered this session`;
+  }
+
+  document.getElementById("changeEventBtn").addEventListener("click", () => {
+    eventInput.value = getEvent() || "";
+    raNameInput.value = getRAInput() || "";
+    eventModal.classList.remove("hidden");
+  });
+
+  document.getElementById("eventSaveBtn").addEventListener("click", () => {
+    const ev = eventInput.value.trim();
+    const ra = raNameInput.value.trim();
+    if (!ev || !ra) return;
+    localStorage.setItem("scorecard_event", ev);
+    localStorage.setItem("scorecard_ra_input", ra);
+    eventModal.classList.add("hidden");
+    refreshHeader();
+  });
+
+  if (!getEvent() || !getRAInput()) {
+    eventModal.classList.remove("hidden");
+  } else {
+    eventModal.classList.add("hidden");
+  }
+  refreshHeader();
+
+  // ---- VALIDATION + SUBMIT ----
+  const raterInput = document.getElementById("raterId");
+  const partnerInput = document.getElementById("partnerId");
+  const submitBtn = document.getElementById("submitBtn");
+  const statusMsg = document.getElementById("statusMsg");
+
+  function validate() {
+    let ok = true;
+    let firstErrorEl = null;
+
+    [raterInput, partnerInput].forEach(inp => {
+      if (!inp.value.trim()) {
+        inp.classList.add("error");
+        ok = false;
+        if (!firstErrorEl) firstErrorEl = inp;
+      } else {
+        inp.classList.remove("error");
+      }
+    });
+
+    document.querySelectorAll("#traitsTable tbody tr").forEach(tr => {
+      if (!(tr.dataset.field in state.traits)) {
+        tr.classList.add("error");
+        ok = false;
+        if (!firstErrorEl) firstErrorEl = tr;
+      } else {
+        tr.classList.remove("error");
+      }
+    });
+
+    document.querySelectorAll("#statementsTable tbody tr").forEach(tr => {
+      if (!(tr.dataset.field in state.statements)) {
+        tr.classList.add("error");
+        ok = false;
+        if (!firstErrorEl) firstErrorEl = tr;
+      } else {
+        tr.classList.remove("error");
+      }
+    });
+
+    if (state.choice === null) {
+      ok = false;
+      if (!firstErrorEl) firstErrorEl = choiceYes;
+    }
+
+    if (!ok && firstErrorEl) {
+      firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    return ok;
+  }
+
+  function resetForm() {
+    raterInput.value = "";
+    partnerInput.value = "";
+    state = { traits: {}, statements: {}, choice: null };
+    document.querySelectorAll("td.cell.selected").forEach(c => c.classList.remove("selected"));
+    document.querySelectorAll("tbody tr.error").forEach(r => r.classList.remove("error"));
+    choiceYes.classList.remove("selected");
+    choiceNo.classList.remove("selected");
+    raterInput.focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  submitBtn.addEventListener("click", async () => {
+    statusMsg.textContent = "";
+    statusMsg.className = "";
+
+    if (!getEvent() || !getRAInput()) {
+      eventModal.classList.remove("hidden");
+      return;
+    }
+
+    if (!validate()) {
+      statusMsg.textContent = "Fill in every field before submitting.";
+      statusMsg.className = "error";
+      return;
+    }
+
+    const payload = {
+      event: getEvent(),
+      ra_input: getRAInput(),
+      rater_id: raterInput.value.trim().toUpperCase(),
+      partner_id: partnerInput.value.trim().toUpperCase(),
+      traits: state.traits,
+      statements: state.statements,
+      choice: state.choice
+    };
+
+    submitBtn.disabled = true;
+    statusMsg.textContent = "Submitting\u2026";
+    statusMsg.className = "";
+
+    try {
+      const res = await fetch(SUBMIT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        throw new Error(errText || `Server returned ${res.status}`);
+      }
+
+      localStorage.setItem("scorecard_count", String(getCount() + 1));
+      refreshHeader();
+      statusMsg.textContent = "Saved.";
+      statusMsg.className = "success";
+      resetForm();
+    } catch (err) {
+      statusMsg.textContent = "Failed to save — check connection and try again.";
+      statusMsg.className = "error";
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
