@@ -377,7 +377,8 @@ async function submitModule() {
     m1_clean: document.getElementById("cb1").checked ? 1 : 0,
     m1_outfit: document.getElementById("cb2").checked ? 1 : 0,
     m1_scent: document.getElementById("cb3").checked ? 1 : 0,
-    m1_reframe: document.getElementById("reflection").value.trim()
+    m1_reframe: document.getElementById("reflection").value.trim(),
+    m1_started_ts: formatRedcapDatetime(START_TS)
   };
 
   try {
@@ -396,7 +397,12 @@ async function submitModule() {
     btn.textContent = "Complete Module";
   }
 }
-
+const START_TS = new Date();
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+  
 if (!TOKEN) {
   document.getElementById("app").innerHTML = `
     <div class="eyebrow">Before the Event</div>
