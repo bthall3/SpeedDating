@@ -370,12 +370,12 @@ async function submitModule() {
   btn.innerHTML = '<span class="spinner"></span> Saving...';
 
   const payload = {
-    token: TOKEN,
-    m1_appearance_clean: document.getElementById("cb1").checked ? 1 : 0,
-    m1_appearance_outfit: document.getElementById("cb2").checked ? 1 : 0,
-    m1_appearance_scent: document.getElementById("cb3").checked ? 1 : 0,
-    m1_nervous_reflection: document.getElementById("reflection").value.trim()
-  };
+  token: TOKEN,
+  m1_clean: document.getElementById("cb1").checked ? 1 : 0,
+  m1_outfit: document.getElementById("cb2").checked ? 1 : 0,
+  m1_scent: document.getElementById("cb3").checked ? 1 : 0,
+  m1_reframe: document.getElementById("reflection").value.trim()
+};
 
   try {
     const res = await fetch(CONFIG.submitEndpoint, {
