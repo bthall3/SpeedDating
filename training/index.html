@@ -231,6 +231,76 @@ body {
   font-size: 14px;
 }
 
+/* Welcome video overlay */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 36, 31, 0.92);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.welcome-box {
+  max-width: 640px;
+  width: 100%;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+}
+.welcome-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 10px;
+}
+.welcome-h2 {
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+.welcome-video {
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+  margin-bottom: 20px;
+}
+.welcome-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.welcome-continue {
+  padding: 12px 26px;
+  border: none;
+  border-radius: 9px;
+  background: var(--crimson);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.welcome-continue:hover { background: #7f1728; }
+.welcome-skip {
+  padding: 12px 6px;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.hidden { display: none !important; }
+
 @media (max-width: 480px) {
   .hero-h1 { font-size: 32px; }
   .node { width: 44px; height: 44px; font-size: 15px; margin-top: 10px; }
@@ -242,6 +312,23 @@ body {
 <body>
 
 <div class="wrap">
+  <div id="welcomeOverlay" class="welcome-overlay hidden">
+    <div class="welcome-box">
+      <div class="welcome-eyebrow">Welcome</div>
+      <h2 class="welcome-h2">Before you get started</h2>
+      <!-- TODO: replace welcome.mp4 with the real recorded video, placed in
+           the same training/ folder as this file. Keep it under GitHub's
+           100MB per-file cap — compress with HandBrake (H.264, modest
+           bitrate or 720p) if the raw recording is larger. -->
+      <video class="welcome-video" id="welcomeVideo" controls playsinline>
+        <source src="welcome.mp4" type="video/mp4">
+        Your browser doesn't support embedded video.
+      </video>
+      <div class="welcome-actions">
+        <button class="welcome-continue" id="welcomeContinueBtn">Continue to your training</button>
+      </div>
+    </div>
+  </div>
   <div id="app">
     <div class="loading">Loading your training...</div>
   </div>
@@ -417,7 +504,28 @@ function renderDashboard(token, data) {
   }
 
   renderDashboard(token || "DEMO", data);
+  maybeShowWelcome(token || "DEMO");
 })();
+
+function maybeShowWelcome(tokenKey) {
+  const storageKey = `welcomeSeen_${tokenKey}`;
+  if (localStorage.getItem(storageKey)) return;
+
+  const overlay = document.getElementById("welcomeOverlay");
+  const video = document.getElementById("welcomeVideo");
+  const continueBtn = document.getElementById("welcomeContinueBtn");
+
+  overlay.classList.remove("hidden");
+
+  function dismiss() {
+    localStorage.setItem(storageKey, "1");
+    overlay.classList.add("hidden");
+    video.pause();
+  }
+
+  continueBtn.addEventListener("click", dismiss);
+  video.addEventListener("ended", dismiss);
+}
 </script>
 
 </body>
