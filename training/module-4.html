@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 — Nonverbal Behavior</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.btn { margin-top: 24px; }
+
+/* Dot-hotspot image cards */
+.figure-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.figure-card {
+  flex: 1;
+  min-width: 150px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.figure-caption {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  text-align: center;
+  margin-top: 8px;
+}
+.figure-svg-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+.figure-svg-wrap svg { width: 100%; height: 100%; display: block; }
+
+.dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--crimson);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px var(--crimson);
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  animation: pulse 2s ease-in-out infinite;
+}
+.dot.viewed { background: var(--gold); box-shadow: 0 0 0 2px var(--gold); animation: none; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--crimson); }
+  50% { box-shadow: 0 0 0 6px rgba(158,27,50,0.15); }
+}
+
+.tip-popover {
+  position: absolute;
+  z-index: 5;
+  max-width: 220px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+.tip-popover.open { display: block; }
+
+.dots-progress {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-top: 12px;
+}
+
+.gate-note {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+}
+
+/* Completion screen */
+.complete-screen { text-align: center; padding: 40px 0; }
+.complete-mark {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--crimson);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--crimson);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:16%"></div></div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const CONFIG = {
+  submitEndpoint: "https://module4-submit.bthall3.workers.dev", // TODO: confirm once deployed
+  returnUrl: "./"
+};
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+const TOKEN = getToken();
+
+const START_TS = new Date();
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+let step = 1;
+const TOTAL_STEPS = 6;
+
+/* =========================================================================
+   FIGURES — simple original line-art illustrations, not photos.
+   TODO: once real photos exist, swap the SVGs below for <img> tags and
+   reposition each dot's "pos" (percentage x/y within the image) to match
+   the actual photo content — dot placement is inherently tied to the
+   specific image used.
+   ========================================================================= */
+const FIGURE_SVGS = {
+  faceSmile: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="90" r="55" fill="none" stroke="#9E1B32" stroke-width="3"/>
+    <circle cx="80" cy="80" r="4" fill="#9E1B32"/>
+    <circle cx="120" cy="80" r="4" fill="#9E1B32"/>
+    <path d="M75 105 Q100 130 125 105" fill="none" stroke="#9E1B32" stroke-width="3" stroke-linecap="round"/>
+    <path d="M55 190 Q100 150 145 190 L145 250 L55 250 Z" fill="none" stroke="#c95a6c" stroke-width="3"/>
+  </svg>`,
+  postureOpen: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="55" r="32" fill="none" stroke="#9E1B32" stroke-width="3"/>
+    <path d="M100 87 L100 170" stroke="#c95a6c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M100 100 L45 140" stroke="#c95a6c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M100 100 L155 140" stroke="#c95a6c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M100 170 Q100 210 65 245" stroke="#c95a6c" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M100 170 Q100 210 135 245" stroke="#c95a6c" stroke-width="4" stroke-linecap="round" fill="none"/>
+  </svg>`,
+  bored: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="90" r="55" fill="none" stroke="#8a8078" stroke-width="3"/>
+    <line x1="70" y1="80" x2="90" y2="80" stroke="#8a8078" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="80" x2="130" y2="80" stroke="#8a8078" stroke-width="3" stroke-linecap="round"/>
+    <line x1="78" y1="112" x2="122" y2="112" stroke="#8a8078" stroke-width="3" stroke-linecap="round"/>
+    <path d="M55 190 Q100 150 145 190 L145 250 L55 250 Z" fill="none" stroke="#c7c1b8" stroke-width="3"/>
+  </svg>`,
+  onPhone: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="90" cy="60" r="30" fill="none" stroke="#8a8078" stroke-width="3"/>
+    <path d="M90 90 L90 170" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M90 110 L140 180" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round"/>
+    <rect x="128" y="175" width="26" height="42" rx="4" fill="none" stroke="#8a8078" stroke-width="3"/>
+    <path d="M90 170 Q90 210 60 245" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M90 170 Q90 210 120 245" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+  </svg>`,
+  closedPosture: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="55" r="32" fill="none" stroke="#8a8078" stroke-width="3"/>
+    <path d="M100 87 L90 170" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M65 115 L135 130" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M135 115 L65 130" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round"/>
+    <path d="M90 170 Q80 210 40 240" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M90 170 Q100 210 145 235" stroke="#c7c1b8" stroke-width="4" stroke-linecap="round" fill="none"/>
+  </svg>`
+};
+
+const EFFECTIVE_FIGURES = [
+  {
+    id: "eff1", svg: "faceSmile", caption: "Facial expression",
+    dots: [
+      { pos: [40, 30], tip: "Smiling can make you seem happy and friendly." },
+      { pos: [65, 30], tip: "Maintaining eye contact when talking with your date makes you seem focused on the conversation." },
+      { pos: [50, 42], tip: "Nodding every so often while your date is talking signals that you're listening." }
+    ]
+  },
+  {
+    id: "eff2", svg: "postureOpen", caption: "Posture",
+    dots: [
+      { pos: [50, 42], tip: "Maintaining open body language (arms uncrossed) can make your date more comfortable." },
+      { pos: [50, 65], tip: "Leaning slightly forward toward your date can reduce psychological and physical distance, creating closeness." }
+    ]
+  }
+];
+
+const INEFFECTIVE_FIGURES = [
+  {
+    id: "ineff1", svg: "bored", caption: "Expression",
+    dots: [ { pos: [50, 30], tip: "Try not to look bored with your date." } ]
+  },
+  {
+    id: "ineff2", svg: "onPhone", caption: "Attention",
+    dots: [ { pos: [65, 45], tip: "Avoid checking your phone or looking around the room — it suggests you aren't interested, or are more interested in something else." } ]
+  },
+  {
+    id: "ineff3", svg: "closedPosture", caption: "Posture",
+    dots: [
+      { pos: [50, 42], tip: "Crossed arms can make you seem closed-off or defensive." },
+      { pos: [30, 70], tip: "Leaning away from your date or turning your legs to the side can suggest you want to leave the conversation." }
+    ]
+  }
+];
+
+// Dot-viewed tracking, keyed "figId-dotIdx" -> true. Used to gate Continue
+// on Steps 2 and 3, and to confirm completion in the final submit.
+const dotsViewedState = {};
+
+function totalDotsFor(figures) {
+  return figures.reduce((sum, f) => sum + f.dots.length, 0);
+}
+function viewedDotsFor(figures) {
+  let count = 0;
+  figures.forEach(f => f.dots.forEach((_, i) => {
+    if (dotsViewedState[`${f.id}-${i}`]) count++;
+  }));
+  return count;
+}
+function allDotsViewed(figures) {
+  return viewedDotsFor(figures) === totalDotsFor(figures);
+}
+
+function renderFigureCard(fig) {
+  const dots = fig.dots.map((d, i) => `
+    <div class="dot" data-fig="${fig.id}" data-dot="${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">+</div>
+    <div class="tip-popover" id="tip-${fig.id}-${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">${d.tip}</div>
+  `).join("");
+
+  return `
+    <div class="figure-card">
+      <div class="figure-svg-wrap">
+        ${FIGURE_SVGS[fig.svg]}
+        ${dots}
+      </div>
+      <div class="figure-caption">${fig.caption}</div>
+    </div>
+  `;
+}
+
+function attachDotHandlers(figures, onProgress) {
+  document.querySelectorAll(".dot").forEach(dot => {
+    dot.addEventListener("click", () => {
+      const figId = dot.dataset.fig;
+      const dotIdx = dot.dataset.dot;
+      const popover = document.getElementById(`tip-${figId}-${dotIdx}`);
+
+      document.querySelectorAll(".tip-popover.open").forEach(p => {
+        if (p !== popover) p.classList.remove("open");
+      });
+
+      popover.classList.toggle("open");
+      dot.classList.add("viewed");
+      dotsViewedState[`${figId}-${dotIdx}`] = true;
+      onProgress();
+    });
+  });
+}
+
+function setProgress() {
+  document.getElementById("progressFill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
+}
+
+function goToStep(n) {
+  step = n;
+  setProgress();
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const renderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6];
+  app.innerHTML = renderers[step - 1]();
+
+  if (step === 2) {
+    attachDotHandlers(EFFECTIVE_FIGURES, () => updateDotGate(EFFECTIVE_FIGURES, "effective"));
+    updateDotGate(EFFECTIVE_FIGURES, "effective");
+  }
+  if (step === 3) {
+    attachDotHandlers(INEFFECTIVE_FIGURES, () => updateDotGate(INEFFECTIVE_FIGURES, "ineffective"));
+    updateDotGate(INEFFECTIVE_FIGURES, "ineffective");
+  }
+}
+
+function updateDotGate(figures, prefix) {
+  const viewed = viewedDotsFor(figures);
+  const total = totalDotsFor(figures);
+  document.getElementById(`${prefix}Progress`).textContent = `${viewed} of ${total} tips viewed`;
+  const btn = document.getElementById(`${prefix}ContinueBtn`);
+  const complete = viewed === total;
+  btn.disabled = !complete;
+  document.getElementById(`${prefix}GateNote`).textContent = complete
+    ? "You're ready to continue."
+    : "Tap every dot above to continue.";
+}
+
+function renderStep1() {
+  return `
+    <div class="eyebrow">Module 4 · Part 4 of 7</div>
+    <h1>Nonverbal behavior tips</h1>
+    <p>When we meet people for the first time, our brains quickly size the person up to determine whether they are safe, trustworthy, interesting, etc. In the next two sections, tap every dot on the pictures to read tips on effective (and ineffective) nonverbal communication.</p>
+    <button class="btn" onclick="goToStep(2)">Continue</button>
+  `;
+}
+
+function renderStep2() {
+  return `
+    <div class="eyebrow">Module 4 · Part 4 of 7</div>
+    <h1>Effective nonverbal behavior</h1>
+    <p>Tap each dot below to read the tip.</p>
+    <div class="figure-row">
+      ${EFFECTIVE_FIGURES.map(renderFigureCard).join("")}
+    </div>
+    <div class="dots-progress" id="effectiveProgress"></div>
+    <div class="gate-note" id="effectiveGateNote"></div>
+    <button class="btn" id="effectiveContinueBtn" disabled onclick="goToStep(3)">Continue</button>
+  `;
+}
+
+function renderStep3() {
+  return `
+    <div class="eyebrow">Module 4 · Part 4 of 7</div>
+    <h1>Ineffective nonverbal behavior</h1>
+    <p>Tap each dot below to read the tip.</p>
+    <div class="figure-row">
+      ${INEFFECTIVE_FIGURES.map(renderFigureCard).join("")}
+    </div>
+    <div class="dots-progress" id="ineffectiveProgress"></div>
+    <div class="gate-note" id="ineffectiveGateNote"></div>
+    <button class="btn" id="ineffectiveContinueBtn" disabled onclick="goToStep(4)">Continue</button>
+  `;
+}
+
+function renderStep4() {
+  return `
+    <div class="eyebrow">Module 4 · Part 4 of 7</div>
+    <h1>Help! I'm not attracted to my date!</h1>
+    <p>It is likely that you will be more immediately attracted to some dates more than others. However, many successful couples report that they were not super attracted to their partner in the beginning. So, even if you don't feel an immediate spark, give your date a chance and try to get to know them. You might realize you like them more than you thought you would.</p>
+    <button class="btn" onclick="goToStep(5)">Continue</button>
+  `;
+}
+
+function renderStep5() {
+  return `
+    <div class="eyebrow">Module 4 · Part 4 of 7</div>
+    <h1>Responding to your date</h1>
+    <p>No two people are exactly alike, so none of your dates will be exactly alike. Because of this, it's important to be responsive to the unique personality of your date. A good dater "knows their audience" and adjusts their approach accordingly.</p>
+    <p><strong>Does your date seem shy?</strong> Try to be reassuring and make your date comfortable. You can also switch to questions that accommodate someone less comfortable with self-disclosure, or ask more follow-up questions about something they seem comfortable talking about.</p>
+    <p><strong>Does your date seem nervous?</strong> You can help ease your date's nerves by remaining calm yourself. You can also directly address any nervousness they share — but avoid asking your date if they're nervous. For instance, if they mention worrying about their outfit and you think it looks good, that's a perfect opportunity to tell them, which can boost their confidence.</p>
+    <p><strong>Does your date seem uninterested?</strong> We often misread situations — a date seeming uninterested may actually mean they're nervous or shy. It's best to continue trying to get to know your date rather than give up.</p>
+    <div class="error-text" id="finishError">Something went wrong saving your progress. Please try again.</div>
+    <button class="btn" id="finishBtn" onclick="submitModule()">Complete Module</button>
+  `;
+}
+
+function renderStep6() {
+  return `
+    <div class="complete-screen">
+      <div class="complete-mark">&#10003;</div>
+      <h1>Module 4 complete</h1>
+      <p>Nice work. You can head back to your training dashboard to continue with the next module.</p>
+      <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
+    </div>
+  `;
+}
+
+async function submitModule() {
+  const btn = document.getElementById("finishBtn");
+  const errorText = document.getElementById("finishError");
+  errorText.style.display = "none";
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+  const allViewed = allDotsViewed(EFFECTIVE_FIGURES) && allDotsViewed(INEFFECTIVE_FIGURES);
+
+  const payload = {
+    token: TOKEN,
+    m4_dots_viewed: allViewed ? 1 : 0,
+    m4_started_ts: formatRedcapDatetime(START_TS)
+  };
+
+  try {
+    const res = await fetch(CONFIG.submitEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("submit failed");
+    goToStep(6);
+  } catch (err) {
+    console.error("module4 submit failed:", err);
+    errorText.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Complete Module";
+  }
+}
+
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="eyebrow">Before the Event</div>
+    <h1>This link looks incomplete.</h1>
+    <p>Please use the link from your training email to access this module.</p>
+  `;
+} else {
+  render();
+}
+</script>
+
+</body>
+</html>
