@@ -1,0 +1,113 @@
+/* =========================================================================
+   Speed Dating Study — shared base stylesheet
+   -------------------------------------------------------------------------
+   Used by: index.html (landing), checkin/index.html, training/index.html,
+   training/module-1.html, training/module-2.html (and future modules).
+
+   scorecard.html links this too, but only for the reset + font import —
+   it intentionally does NOT use the --crimson/--bg tokens below. It's a
+   barebones black-and-white RA data-entry tool built to fit one iPad
+   screen without scrolling, and needs high contrast + compact spacing
+   more than brand consistency. Its own component styles stay in its own
+   <style> block.
+
+   This file covers what's ACTUALLY shared: reset, font loading, color
+   tokens, typography defaults, and a few common components (buttons,
+   spinner, error text). Each page keeps its own <style> block for
+   layout that's genuinely unique to that page (hero sections, module
+   cards, scorecard tables, etc.) — forcing those into one mega-file
+   would just create class-name collisions across very different layouts.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.7;
+}
+
+/* ---- Canonical design tokens ----
+   Standardized to one value across all participant-facing pages.
+   (Previously checkin/landing used #faf8f2, training used #f7f2ea —
+   now unified on the training value everywhere.) */
+:root {
+  --bg: #f7f2ea;
+  --bg-card: #fffdf9;
+  --ink: #2b241f;
+  --ink-soft: #6b5f54;
+  --crimson: #9E1B32;
+  --crimson-soft: #c95a6c;
+  --terracotta: #ecddd6;
+  --line: #e3d6ca;
+  --gold: #b8924a;
+  --error: #b3261e;
+  --radius: 14px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+h1, h2, h3 {
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 20px;
+}
+
+p {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+}
+
+/* ---- Shared button ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 10px;
+  background: var(--crimson);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.btn:hover:not(:disabled) { background: #7f1728; }
+.btn:disabled { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+
+/* ---- Shared spinner (used on submit buttons across checkin/module pages) ---- */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Shared error text ---- */
+.error-text {
+  color: var(--crimson);
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+
+.hidden { display: none !important; }
