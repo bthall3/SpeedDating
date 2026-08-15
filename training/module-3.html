@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 — Making Conversation</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+h2.sub {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin: 24px 0 10px;
+}
+
+.btn { margin-top: 24px; }
+
+/* Idea cards (Slide 13 approaches) */
+.idea-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+}
+.idea-title {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--crimson);
+  margin-bottom: 6px;
+}
+.idea-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.idea-tip {
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--gold);
+}
+
+/* DO/DON'T reference table */
+.dodont-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+.dodont-col { border-radius: var(--radius); padding: 16px; }
+.dodont-col.do { background: var(--terracotta); }
+.dodont-col.dont { background: var(--bg-card); border: 1.5px solid var(--line); }
+.dodont-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  color: var(--crimson);
+}
+.dodont-item { font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: var(--ink); }
+
+/* Own-question boxes */
+.own-q-block {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+.own-q-label { font-size: 12px; font-weight: 700; color: var(--crimson); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.own-q-example { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.5; }
+.own-q-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg);
+}
+.own-q-input:focus { outline: none; border-color: var(--crimson); }
+
+/* Video block (reuses module 2 pattern) */
+.video-block {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+video {
+  width: 100%;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+  margin-bottom: 10px;
+}
+.watched-flag {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--crimson-soft);
+}
+.watched-flag.done { color: var(--crimson); }
+
+/* Rank-order check */
+.rank-item {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.rank-item-label { font-size: 14px; font-weight: 500; flex: 1; min-width: 160px; }
+.rank-buttons { display: flex; gap: 6px; }
+.rank-btn {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.rank-btn.selected { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+
+/* Sort check */
+.sort-item {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sort-item-label { font-size: 14px; font-weight: 500; flex: 1; min-width: 160px; }
+.sort-buttons { display: flex; gap: 6px; }
+.sort-btn {
+  min-width: 66px; height: 34px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.sort-btn.selected { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+
+.check-section-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 24px 0 12px;
+}
+
+.gate-note {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 14px;
+}
+
+/* Completion screen */
+.complete-screen { text-align: center; padding: 40px 0; }
+.complete-mark {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--crimson);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--crimson);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:14%"></div></div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const CONFIG = {
+  submitEndpoint: "https://module3-submit.bthall3.workers.dev", // TODO: confirm once deployed
+  returnUrl: "./"
+};
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+const TOKEN = getToken();
+
+const START_TS = new Date();
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+let step = 1;
+const TOTAL_STEPS = 7;
+let videoWatched = false;
+
+// Rank-order state: key -> rank (1-5) or null
+const RANK_ITEMS = [
+  { key: "compliment", label: "Compliment-to-question" },
+  { key: "observation", label: "Make an observation" },
+  { key: "metaframe", label: "Meta-framing" },
+  { key: "organic", label: "Organic topic escalation" },
+  { key: "direct", label: "Straight to the point" }
+];
+const rankState = { compliment: null, observation: null, metaframe: null, organic: null, direct: null };
+
+// Sort state: key -> "do" | "dont" | null. Shuffled display order, fixed answer key.
+const SORT_ITEMS = [
+  { key: "demographics", label: "Talk about more than just demographic information" },
+  { key: "interview", label: "Interview your date" },
+  { key: "playful", label: "Be playful and make jokes" },
+  { key: "complain", label: "Complain" },
+  { key: "bodylang", label: "Maintain open and inviting body language" },
+  { key: "overdisclose", label: "Over-disclose or disclose too early" },
+  { key: "authentic", label: "Be authentic" },
+  { key: "risky", label: "Bring up risky topics" },
+  { key: "followup", label: "Ask follow-up questions" },
+  { key: "humblebrag", label: "Humble brag" }
+];
+const sortState = {};
+SORT_ITEMS.forEach(i => sortState[i.key] = null);
+const SHUFFLED_SORT_ITEMS = [...SORT_ITEMS].sort(() => Math.random() - 0.5);
+
+function setProgress() {
+  document.getElementById("progressFill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
+}
+
+function goToStep(n) {
+  step = n;
+  setProgress();
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const renderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6, renderStep7];
+  app.innerHTML = renderers[step - 1]();
+
+  if (step === 4) attachOwnQHandlers();
+  if (step === 5) attachVideoHandlers();
+  if (step === 6) attachCheckHandlers();
+}
+
+function renderStep1() {
+  return `
+    <div class="eyebrow">Module 3 · Part 3 of 7</div>
+    <h1>Misconceptions of the good conversationalist</h1>
+    <p>People often think that "smooth" people or people who seem to be great conversationalists are just born that way. In reality, these types of people typically cultivated these skills through having plans for interactions. For example, they take time before events to think about different conversation topics and conversation-starting questions. These types of people are also prepared to change the topic of conversation depending on what other people are talking about.</p>
+    <p>Assume you will go on eight dates. As you go through this section, think of some good questions to start conversations and potential follow-up questions to keep conversation going. Write these ideas down and consider adding to them and revising them regularly. Having a strong, memorized list of questions and topics can go a long way in making you seem more sociable, smooth, fun, and confident during your dates.</p>
+    <button class="btn" onclick="goToStep(2)">Continue</button>
+  `;
+}
+
+function renderStep2() {
+  const ideas = [
+    { title: "Compliment-to-question", desc: `After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question: "That is a really cool shirt, where'd you get it?"`, tip: "Don't give every date the same compliment — make it specific and genuine." },
+    { title: "Make an observation", desc: "A low-stakes way to establish common ground is to make an observation about the situation — like asking if they've done speed-dating before, or how the event is going for them." },
+    { title: "Meta-framing", desc: `Break out of the typical script: "These dates always feel like an interview, we can skip the small talk and pick something more interesting if you're down?"` },
+    { title: "Organic topic escalation", desc: `If your date mentions something in their introduction (e.g., "I'm from Colorado"), use it as a bridge to a question (e.g., "Oh cool, do you like to ski?").` },
+    { title: "Get straight to the point", desc: "Sometimes being direct is the best approach — simply ask your date if you can ask them a random question and go from there." }
+  ];
+
+  const cards = ideas.map(i => `
+    <div class="idea-card">
+      <div class="idea-title">${i.title}</div>
+      <div class="idea-desc">${i.desc}</div>
+      ${i.tip ? `<div class="idea-tip">${i.tip}</div>` : ""}
+    </div>
+  `).join("");
+
+  return `
+    <div class="eyebrow">Module 3 · Part 3 of 7</div>
+    <h1>Beginning conversation</h1>
+    <p>There are many ways to begin a conversation with your date. Having a strong start can improve your date's impressions of you, help relax both of you, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into real conversation. Consider a few you might like to try.</p>
+    ${cards}
+    <button class="btn" onclick="goToStep(3)">Continue</button>
+  `;
+}
+
+function renderStep3() {
+  return `
+    <div class="eyebrow">Module 3 · Part 3 of 7</div>
+    <h1>Continuing conversation</h1>
+    <p>Once you've introduced yourself and started a conversation with your date, keeping the momentum throughout your date can aid in success. Below are some do's and don'ts, backed by research on what makes conversations succeed.</p>
+    <div class="dodont-table">
+      <div class="dodont-col do">
+        <div class="dodont-label">Do</div>
+        <div class="dodont-item">Talk about more than just demographic information — music taste, hobbies, notable experiences.</div>
+        <div class="dodont-item">Be playful and make jokes.</div>
+        <div class="dodont-item">Maintain open and inviting body language — lean in, smile, make eye contact.</div>
+        <div class="dodont-item">Be authentic — let your genuine reactions show.</div>
+        <div class="dodont-item">Ask follow-up questions — go deeper on one or two topics rather than shallower on several.</div>
+      </div>
+      <div class="dodont-col dont">
+        <div class="dodont-label">Don't</div>
+        <div class="dodont-item">Interview your date — aim for a 50-50 balance between talking and listening.</div>
+        <div class="dodont-item">Complain — negativity is often off-putting.</div>
+        <div class="dodont-item">Over-disclose or disclose too early.</div>
+        <div class="dodont-item">Bring up risky topics like politics, sex, or religion.</div>
+        <div class="dodont-item">Humble brag — it often comes across as inauthentic.</div>
+      </div>
+    </div>
+    <button class="btn" onclick="goToStep(4)">Continue</button>
+  `;
+}
+
+function renderStep4() {
+  return `
+    <div class="eyebrow">Module 3 · Part 3 of 7</div>
+    <h1>Developing a deeper connection</h1>
+    <p>Research suggests that escalating self-disclosure increases interpersonal closeness. On a date, you can take turns asking one another questions that gradually increase in how "personal" they are — divided into three levels. Speed dates are short, so you may only get through one question, and that's OK. Depth of conversation is often better than breadth.</p>
+    <p><strong>Level 1 example:</strong> Given the choice of anyone in the world, whom would you want as a dinner guest?</p>
+    <p><strong>Level 2 example:</strong> Is there something you've dreamed of doing for a long time? Why haven't you done it?</p>
+    <p><strong>Level 3 example:</strong> Tell your partner something you like about them already.</p>
+    <p>We encourage you to generate your own similar questions so your dates don't hear the same ones from multiple people. Write one for each level below.</p>
+
+    <div class="own-q-block">
+      <div class="own-q-label">Your Level 1 question</div>
+      <input class="own-q-input" id="ownL1" placeholder="Type your question...">
+    </div>
+    <div class="own-q-block">
+      <div class="own-q-label">Your Level 2 question</div>
+      <input class="own-q-input" id="ownL2" placeholder="Type your question...">
+    </div>
+    <div class="own-q-block">
+      <div class="own-q-label">Your Level 3 question</div>
+      <input class="own-q-input" id="ownL3" placeholder="Type your question...">
+    </div>
+
+    <div class="error-text" id="ownQError">Please fill in all three questions before continuing.</div>
+    <button class="btn" id="ownQContinueBtn" disabled onclick="continueFromStep4()">Continue</button>
+  `;
+}
+
+const ownQAnswers = { l1: "", l2: "", l3: "" };
+function continueFromStep4() {
+  ownQAnswers.l1 = document.getElementById("ownL1").value.trim();
+  ownQAnswers.l2 = document.getElementById("ownL2").value.trim();
+  ownQAnswers.l3 = document.getElementById("ownL3").value.trim();
+  goToStep(5);
+}
+
+function attachOwnQHandlers() {
+  const inputs = ["ownL1", "ownL2", "ownL3"].map(id => document.getElementById(id));
+  const btn = document.getElementById("ownQContinueBtn");
+  function check() {
+    const allFilled = inputs.every(i => i.value.trim().length > 0);
+    btn.disabled = !allFilled;
+  }
+  inputs.forEach(i => i.addEventListener("input", check));
+}
+
+function renderStep5() {
+  return `
+    <div class="eyebrow">Module 3 · Part 3 of 7</div>
+    <h1>Creating your own little world</h1>
+    <p>Another effective strategy that increases closeness is developing what relationship researchers call a "microculture." While hard to build in just a few minutes, you can try to find unique things you and your date have in common or make shared observations. Watch the video below for an example — be sure any observation you make is genuinely unique to that date.</p>
+
+    <div class="video-block">
+      <!-- TODO: replace microculture-video.mp4 with the real recorded video,
+           placed in the same training/ folder as this page. -->
+      <video id="microVideo" controls playsinline>
+        <source src="microculture-video.mp4" type="video/mp4">
+        Your browser doesn't support embedded video.
+      </video>
+      <div class="watched-flag" id="microWatchedFlag">○ Watch to continue</div>
+    </div>
+
+    <div class="gate-note" id="microGateNote">Watch the video above to continue.</div>
+    <button class="btn" id="microContinueBtn" disabled onclick="goToStep(6)">Continue</button>
+  `;
+}
+
+function attachVideoHandlers() {
+  const v = document.getElementById("microVideo");
+  v.addEventListener("ended", () => {
+    videoWatched = true;
+    document.getElementById("microWatchedFlag").textContent = "✓ Watched";
+    document.getElementById("microWatchedFlag").classList.add("done");
+    document.getElementById("microContinueBtn").disabled = false;
+    document.getElementById("microGateNote").textContent = "You're ready to continue.";
+  });
+}
+
+function renderStep6() {
+  const rankRows = RANK_ITEMS.map(item => `
+    <div class="rank-item" data-key="${item.key}">
+      <div class="rank-item-label">${item.label}</div>
+      <div class="rank-buttons">
+        ${[1,2,3,4,5].map(n => `<button class="rank-btn" data-key="${item.key}" data-rank="${n}">${n}</button>`).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  const sortRows = SHUFFLED_SORT_ITEMS.map(item => `
+    <div class="sort-item" data-key="${item.key}">
+      <div class="sort-item-label">${item.label}</div>
+      <div class="sort-buttons">
+        <button class="sort-btn" data-key="${item.key}" data-val="do">Do</button>
+        <button class="sort-btn" data-key="${item.key}" data-val="dont">Don't</button>
+      </div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="eyebrow">Module 3 · Check-in</div>
+    <h1>Understanding and application check</h1>
+
+    <div class="check-section-label">Rank these approaches from 1 (most comfortable trying) to 5 (least comfortable trying). Each number can only be used once.</div>
+    ${rankRows}
+
+    <div class="check-section-label">Sort each behavior into Do or Don't.</div>
+    ${sortRows}
+
+    <div class="error-text" id="checkError">Please assign a unique rank (1–5) to each approach and sort every behavior before continuing.</div>
+    <button class="btn" id="checkSubmitBtn" disabled onclick="submitModule()">Complete Module</button>
+  `;
+}
+
+function attachCheckHandlers() {
+  document.querySelectorAll(".rank-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.key;
+      const rank = parseInt(btn.dataset.rank, 10);
+
+      // Clear this rank from whichever item currently holds it
+      Object.keys(rankState).forEach(k => {
+        if (rankState[k] === rank) rankState[k] = null;
+      });
+      rankState[key] = rank;
+      refreshRankButtons();
+      checkCompleteState();
+    });
+  });
+
+  document.querySelectorAll(".sort-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.key;
+      const val = btn.dataset.val;
+      sortState[key] = val;
+      refreshSortButtons();
+      checkCompleteState();
+    });
+  });
+}
+
+function refreshRankButtons() {
+  document.querySelectorAll(".rank-item").forEach(row => {
+    const key = row.dataset.key;
+    row.querySelectorAll(".rank-btn").forEach(btn => {
+      btn.classList.toggle("selected", rankState[key] === parseInt(btn.dataset.rank, 10));
+    });
+  });
+}
+
+function refreshSortButtons() {
+  document.querySelectorAll(".sort-item").forEach(row => {
+    const key = row.dataset.key;
+    row.querySelectorAll(".sort-btn").forEach(btn => {
+      btn.classList.toggle("selected", sortState[key] === btn.dataset.val);
+    });
+  });
+}
+
+function checkCompleteState() {
+  const ranksAssigned = Object.values(rankState);
+  const allRanked = ranksAssigned.every(r => r !== null) && new Set(ranksAssigned).size === 5;
+  const allSorted = Object.values(sortState).every(v => v !== null);
+  document.getElementById("checkSubmitBtn").disabled = !(allRanked && allSorted);
+}
+
+function renderStep7() {
+  return `
+    <div class="complete-screen">
+      <div class="complete-mark">&#10003;</div>
+      <h1>Module 3 complete</h1>
+      <p>Nice work. You can head back to your training dashboard to continue with the next module.</p>
+      <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
+    </div>
+  `;
+}
+
+async function submitModule() {
+  const btn = document.getElementById("checkSubmitBtn");
+  const errorText = document.getElementById("checkError");
+  errorText.style.display = "none";
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+  const payload = {
+    token: TOKEN,
+    m3_own_l1: ownQAnswers.l1,
+    m3_own_l2: ownQAnswers.l2,
+    m3_own_l3: ownQAnswers.l3,
+    m3_video_watched: videoWatched ? 1 : 0,
+    m3_rank_compliment: rankState.compliment,
+    m3_rank_observation: rankState.observation,
+    m3_rank_metaframe: rankState.metaframe,
+    m3_rank_organic: rankState.organic,
+    m3_rank_direct: rankState.direct,
+    m3_sort_demographics: sortState.demographics,
+    m3_sort_interview: sortState.interview,
+    m3_sort_playful: sortState.playful,
+    m3_sort_complain: sortState.complain,
+    m3_sort_bodylang: sortState.bodylang,
+    m3_sort_overdisclose: sortState.overdisclose,
+    m3_sort_authentic: sortState.authentic,
+    m3_sort_risky: sortState.risky,
+    m3_sort_followup: sortState.followup,
+    m3_sort_humblebrag: sortState.humblebrag,
+    m3_started_ts: formatRedcapDatetime(START_TS)
+  };
+
+  try {
+    const res = await fetch(CONFIG.submitEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("submit failed");
+    goToStep(7);
+  } catch (err) {
+    console.error("module3 submit failed:", err);
+    errorText.textContent = "Something went wrong saving your responses. Please try again.";
+    errorText.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Complete Module";
+  }
+}
+
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="eyebrow">Before the Event</div>
+    <h1>This link looks incomplete.</h1>
+    <p>Please use the link from your training email to access this module.</p>
+  `;
+} else {
+  render();
+}
+</script>
+
+</body>
+</html>
