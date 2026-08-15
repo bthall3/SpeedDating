@@ -267,7 +267,7 @@ const RANK_ITEMS = [
 ];
 const rankState = { compliment: null, observation: null, metaframe: null, organic: null, direct: null };
 
-// Sort state: key -> "do" | "dont" | null. Shuffled display order, fixed answer key.
+// Sort state: key -> 1 (Do) | 0 (Don't) | null. Shuffled display order, fixed answer key.
 const SORT_ITEMS = [
   { key: "demographics", label: "Talk about more than just demographic information" },
   { key: "interview", label: "Interview your date" },
@@ -460,8 +460,8 @@ function renderStep6() {
     <div class="sort-item" data-key="${item.key}">
       <div class="sort-item-label">${item.label}</div>
       <div class="sort-buttons">
-        <button class="sort-btn" data-key="${item.key}" data-val="do">Do</button>
-        <button class="sort-btn" data-key="${item.key}" data-val="dont">Don't</button>
+        <button class="sort-btn" data-key="${item.key}" data-val="1">Do</button>
+        <button class="sort-btn" data-key="${item.key}" data-val="0">Don't</button>
       </div>
     </div>
   `).join("");
@@ -500,7 +500,7 @@ function attachCheckHandlers() {
   document.querySelectorAll(".sort-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const key = btn.dataset.key;
-      const val = btn.dataset.val;
+      const val = parseInt(btn.dataset.val, 10);
       sortState[key] = val;
       refreshSortButtons();
       checkCompleteState();
@@ -521,7 +521,7 @@ function refreshSortButtons() {
   document.querySelectorAll(".sort-item").forEach(row => {
     const key = row.dataset.key;
     row.querySelectorAll(".sort-btn").forEach(btn => {
-      btn.classList.toggle("selected", sortState[key] === btn.dataset.val);
+      btn.classList.toggle("selected", sortState[key] === parseInt(btn.dataset.val, 10));
     });
   });
 }
