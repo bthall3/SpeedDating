@@ -38,29 +38,24 @@ h1 {
   font-size: 28px;
   line-height: 1.2;
 }
-h2.sub {
-  font-family: 'Lora', serif;
-  font-size: 18px;
-  font-weight: 500;
-  margin: 24px 0 10px;
-}
 
 .btn { margin-top: 24px; }
 
-/* Idea cards (Slide 13 approaches) */
-.idea-card {
+/* Idea carousel (Slide 13 approaches) */
+.carousel-card {
   background: var(--bg-card);
   border: 1.5px solid var(--line);
   border-radius: var(--radius);
-  padding: 18px 20px;
-  margin-bottom: 12px;
+  padding: 22px 22px 20px;
+  margin: 20px 0 14px;
+  min-height: 140px;
 }
 .idea-title {
   font-family: 'Lora', serif;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--crimson);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .idea-desc {
   font-size: 14px;
@@ -68,10 +63,49 @@ h2.sub {
   color: var(--ink-soft);
 }
 .idea-tip {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 12.5px;
   font-style: italic;
   color: var(--gold);
+}
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 8px;
+}
+.carousel-arrow {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--bg-card);
+  color: var(--crimson);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-arrow:hover { border-color: var(--crimson); }
+.carousel-dots {
+  display: flex;
+  gap: 7px;
+}
+.carousel-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.carousel-dot.active { background: var(--crimson); width: 20px; border-radius: 4px; transition: all 0.2s ease; }
+.carousel-count {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
 }
 
 /* DO/DON'T reference table */
@@ -82,28 +116,45 @@ h2.sub {
   margin: 16px 0;
 }
 .dodont-col { border-radius: var(--radius); padding: 16px; }
-.dodont-col.do { background: var(--terracotta); }
-.dodont-col.dont { background: var(--bg-card); border: 1.5px solid var(--line); }
+.dodont-col.do { background: #e5f1e8; border: 1.5px solid #bcdcc4; }
+.dodont-col.dont { background: #f7e7e5; border: 1.5px solid #e6bcb6; }
 .dodont-label {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-bottom: 10px;
-  color: var(--crimson);
 }
+.dodont-col.do .dodont-label { color: #2f7a4f; }
+.dodont-col.dont .dodont-label { color: #b3392f; }
 .dodont-item { font-size: 13px; line-height: 1.6; margin-bottom: 8px; color: var(--ink); }
 
-/* Own-question boxes */
-.own-q-block {
+/* Level questions reference + own-question boxes */
+.level-block {
   background: var(--bg-card);
   border: 1.5px solid var(--line);
   border-radius: var(--radius);
   padding: 20px;
   margin-bottom: 14px;
 }
+.level-title {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--crimson);
+  margin-bottom: 8px;
+}
+.level-examples {
+  margin: 0 0 14px;
+  padding-left: 18px;
+}
+.level-examples li {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
 .own-q-label { font-size: 12px; font-weight: 700; color: var(--crimson); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-.own-q-example { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.5; }
 .own-q-input {
   width: 100%;
   padding: 12px 14px;
@@ -190,7 +241,8 @@ video {
   color: var(--ink-soft);
   cursor: pointer;
 }
-.sort-btn.selected { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+.sort-btn[data-val="1"].selected { background: #2f7a4f; border-color: #2f7a4f; color: #fff; }
+.sort-btn[data-val="0"].selected { background: #b3392f; border-color: #b3392f; color: #fff; }
 
 .check-section-label {
   font-size: 13.5px;
@@ -257,6 +309,42 @@ let step = 1;
 const TOTAL_STEPS = 7;
 let videoWatched = false;
 
+const IDEAS = [
+  { title: "Compliment-to-question", desc: `After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question: "That is a really cool shirt, where'd you get it?"`, tip: "Don't give every date the same compliment — make it specific and genuine." },
+  { title: "Make an observation", desc: "A low-stakes way to establish common ground is to make an observation about the situation — like asking if they've done speed-dating before, or how the event is going for them." },
+  { title: "Meta-framing", desc: `Break out of the typical script: "These dates always feel like an interview, we can skip the small talk and pick something more interesting if you're down?"` },
+  { title: "Organic topic escalation", desc: `If your date mentions something in their introduction (e.g., "I'm from Colorado"), use it as a bridge to a question (e.g., "Oh cool, do you like to ski?").` },
+  { title: "Get straight to the point", desc: "Sometimes being direct is the best approach — simply ask your date if you can ask them a random question and go from there." }
+];
+let carouselIndex = 0;
+
+const LEVELS = [
+  {
+    n: 1,
+    examples: [
+      "Given the choice of anyone in the world, whom would you want as a dinner guest?",
+      "Would you like to be famous? In what way?",
+      "For what in your life do you feel most grateful?"
+    ]
+  },
+  {
+    n: 2,
+    examples: [
+      "If a crystal ball could tell you the truth about yourself, your life, the future, or anything else, what would you want to know?",
+      "Is there something that you've dreamed of doing for a long time? Why haven't you done it?",
+      "What is the greatest accomplishment of your life?"
+    ]
+  },
+  {
+    n: 3,
+    examples: [
+      "If you were going to become a close friend with your partner, please share what would be important for them to know.",
+      "Tell your partner something that you like about them already.",
+      "Your house, containing everything you own, catches fire. After saving your loved ones and pets, you have time to safely make a final dash to save any one item. What would it be? Why?"
+    ]
+  }
+];
+
 // Rank-order state: key -> rank (1-5) or null
 const RANK_ITEMS = [
   { key: "compliment", label: "Compliment-to-question" },
@@ -300,6 +388,7 @@ function render() {
   const renderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6, renderStep7];
   app.innerHTML = renderers[step - 1]();
 
+  if (step === 2) attachCarouselHandlers();
   if (step === 4) attachOwnQHandlers();
   if (step === 5) attachVideoHandlers();
   if (step === 6) attachCheckHandlers();
@@ -316,29 +405,58 @@ function renderStep1() {
 }
 
 function renderStep2() {
-  const ideas = [
-    { title: "Compliment-to-question", desc: `After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question: "That is a really cool shirt, where'd you get it?"`, tip: "Don't give every date the same compliment — make it specific and genuine." },
-    { title: "Make an observation", desc: "A low-stakes way to establish common ground is to make an observation about the situation — like asking if they've done speed-dating before, or how the event is going for them." },
-    { title: "Meta-framing", desc: `Break out of the typical script: "These dates always feel like an interview, we can skip the small talk and pick something more interesting if you're down?"` },
-    { title: "Organic topic escalation", desc: `If your date mentions something in their introduction (e.g., "I'm from Colorado"), use it as a bridge to a question (e.g., "Oh cool, do you like to ski?").` },
-    { title: "Get straight to the point", desc: "Sometimes being direct is the best approach — simply ask your date if you can ask them a random question and go from there." }
-  ];
-
-  const cards = ideas.map(i => `
-    <div class="idea-card">
-      <div class="idea-title">${i.title}</div>
-      <div class="idea-desc">${i.desc}</div>
-      ${i.tip ? `<div class="idea-tip">${i.tip}</div>` : ""}
-    </div>
-  `).join("");
-
   return `
     <div class="eyebrow">Module 3 · Part 3 of 7</div>
     <h1>Beginning conversation</h1>
-    <p>There are many ways to begin a conversation with your date. Having a strong start can improve your date's impressions of you, help relax both of you, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into real conversation. Consider a few you might like to try.</p>
-    ${cards}
+    <p>There are many ways to begin a conversation with your date. Having a strong start can improve your date's impressions of you, help relax both of you, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into real conversation. Click through and consider a few you might like to try.</p>
+
+    <div class="carousel-count" id="carouselCount"></div>
+    <div id="carouselCardWrap"></div>
+    <div class="carousel-nav">
+      <button class="carousel-arrow" id="carouselPrev">&larr;</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+      <button class="carousel-arrow" id="carouselNext">&rarr;</button>
+    </div>
+
     <button class="btn" onclick="goToStep(3)">Continue</button>
   `;
+}
+
+function renderCarouselCard() {
+  const idea = IDEAS[carouselIndex];
+  document.getElementById("carouselCardWrap").innerHTML = `
+    <div class="carousel-card">
+      <div class="idea-title">${idea.title}</div>
+      <div class="idea-desc">${idea.desc}</div>
+      ${idea.tip ? `<div class="idea-tip">${idea.tip}</div>` : ""}
+    </div>
+  `;
+  document.getElementById("carouselCount").textContent = `${carouselIndex + 1} of ${IDEAS.length}`;
+  document.querySelectorAll(".carousel-dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === carouselIndex);
+  });
+}
+
+function attachCarouselHandlers() {
+  const dotsWrap = document.getElementById("carouselDots");
+  dotsWrap.innerHTML = IDEAS.map((_, i) => `<button class="carousel-dot" data-i="${i}"></button>`).join("");
+
+  document.getElementById("carouselPrev").addEventListener("click", () => {
+    carouselIndex = (carouselIndex - 1 + IDEAS.length) % IDEAS.length;
+    renderCarouselCard();
+  });
+  document.getElementById("carouselNext").addEventListener("click", () => {
+    carouselIndex = (carouselIndex + 1) % IDEAS.length;
+    renderCarouselCard();
+  });
+  dotsWrap.querySelectorAll(".carousel-dot").forEach(dot => {
+    dot.addEventListener("click", () => {
+      carouselIndex = parseInt(dot.dataset.i, 10);
+      renderCarouselCard();
+    });
+  });
+
+  renderCarouselCard();
 }
 
 function renderStep3() {
@@ -369,27 +487,24 @@ function renderStep3() {
 }
 
 function renderStep4() {
+  const levelBlocks = LEVELS.map(l => `
+    <div class="level-block">
+      <div class="level-title">Level ${l.n}</div>
+      <ul class="level-examples">
+        ${l.examples.map(e => `<li>${e}</li>`).join("")}
+      </ul>
+      <div class="own-q-label">Your Level ${l.n} question</div>
+      <input class="own-q-input" id="ownL${l.n}" placeholder="Type your question...">
+    </div>
+  `).join("");
+
   return `
     <div class="eyebrow">Module 3 · Part 3 of 7</div>
     <h1>Developing a deeper connection</h1>
     <p>Research suggests that escalating self-disclosure increases interpersonal closeness. On a date, you can take turns asking one another questions that gradually increase in how "personal" they are — divided into three levels. Speed dates are short, so you may only get through one question, and that's OK. Depth of conversation is often better than breadth.</p>
-    <p><strong>Level 1 example:</strong> Given the choice of anyone in the world, whom would you want as a dinner guest?</p>
-    <p><strong>Level 2 example:</strong> Is there something you've dreamed of doing for a long time? Why haven't you done it?</p>
-    <p><strong>Level 3 example:</strong> Tell your partner something you like about them already.</p>
-    <p>We encourage you to generate your own similar questions so your dates don't hear the same ones from multiple people. Write one for each level below.</p>
+    <p>Below are a few example questions for each level. We encourage you to generate your own similar questions so your dates don't hear the same ones from multiple people. Write one for each level below.</p>
 
-    <div class="own-q-block">
-      <div class="own-q-label">Your Level 1 question</div>
-      <input class="own-q-input" id="ownL1" placeholder="Type your question...">
-    </div>
-    <div class="own-q-block">
-      <div class="own-q-label">Your Level 2 question</div>
-      <input class="own-q-input" id="ownL2" placeholder="Type your question...">
-    </div>
-    <div class="own-q-block">
-      <div class="own-q-label">Your Level 3 question</div>
-      <input class="own-q-input" id="ownL3" placeholder="Type your question...">
-    </div>
+    ${levelBlocks}
 
     <div class="error-text" id="ownQError">Please fill in all three questions before continuing.</div>
     <button class="btn" id="ownQContinueBtn" disabled onclick="continueFromStep4()">Continue</button>
