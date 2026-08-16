@@ -14,6 +14,11 @@
   display: flex;
   flex-direction: column;
 }
+.wrap.chat-mode {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
 
 .eyebrow {
   font-size: 12px;
@@ -225,6 +230,7 @@ function formatRedcapDatetime(d) {
 
 function render() {
   const app = document.getElementById("app");
+  app.classList.toggle("chat-mode", screen === "chat");
   if (screen === "intro") app.innerHTML = renderIntro();
   if (screen === "chat") app.innerHTML = renderChat();
   if (screen === "feedback") app.innerHTML = renderFeedback();
