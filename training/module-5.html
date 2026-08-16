@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 — Additional Tips</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.btn { margin-top: 24px; }
+
+/* True/False check */
+.tf-item {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.tf-statement { font-size: 14.5px; margin-bottom: 12px; }
+.tf-buttons { display: flex; gap: 10px; }
+.tf-btn {
+  flex: 1;
+  height: 42px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.tf-btn.selected { background: var(--crimson); border-color: var(--crimson); color: #fff; }
+
+/* Completion screen */
+.complete-screen { text-align: center; padding: 40px 0; }
+.complete-mark {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--crimson);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--crimson);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const CONFIG = {
+  submitEndpoint: "https://module5-submit.bthall3.workers.dev", // TODO: confirm once deployed
+  returnUrl: "./"
+};
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+const TOKEN = getToken();
+
+const START_TS = new Date();
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+let step = 1;
+const TOTAL_STEPS = 3;
+
+function setProgress() {
+  document.getElementById("progressFill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
+}
+
+function goToStep(n) {
+  step = n;
+  setProgress();
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const renderers = [renderStep1, renderStep2, renderStep3];
+  app.innerHTML = renderers[step - 1]();
+
+  if (step === 2) attachTFHandlers();
+}
+
+function renderStep1() {
+  return `
+    <div class="eyebrow">Module 5 · Part 5 of 7</div>
+    <h1>Help! I'm not attracted to my date!</h1>
+    <p>It is likely that you will be more immediately attracted to some dates more than others. However, many successful couples report that they were not super attracted to their partner in the beginning. So, even if you don't feel an immediate spark, give your date a chance and try to get to know them. You might realize you like them more than you thought you would.</p>
+    <h1 style="margin-top: 32px;">Responding to your date</h1>
+    <p>No two people are exactly alike, so none of your dates will be exactly alike. Because of this, it's important to be responsive to the unique personality of your date. A good dater "knows their audience" and adjusts their approach accordingly.</p>
+    <p><strong>Does your date seem shy?</strong> Try to be reassuring and make your date comfortable. You can also switch to questions that accommodate someone less comfortable with self-disclosure, or ask more follow-up questions about something they seem comfortable talking about.</p>
+    <p><strong>Does your date seem nervous?</strong> You can help ease your date's nerves by remaining calm yourself. You can also directly address any nervousness they share — but avoid asking your date if they're nervous. For instance, if they mention worrying about their outfit and you think it looks good, that's a perfect opportunity to tell them, which can boost their confidence.</p>
+    <p><strong>Does your date seem uninterested?</strong> We often misread situations — a date seeming uninterested may actually mean they're nervous or shy. It's best to continue trying to get to know your date rather than give up.</p>
+    <button class="btn" onclick="goToStep(2)">Continue</button>
+  `;
+}
+
+const TF_ITEMS = [
+  { key: "tf_1", statement: "If I am not immediately attracted to my date, I will probably never be attracted to them." },
+  { key: "tf_2", statement: "It is better to talk about one topic on a deeper level than a bunch of topics on a shallow level." },
+  { key: "tf_3", statement: "I will have the most success if I treat all of my dates the same way." }
+];
+const tfState = { tf_1: null, tf_2: null, tf_3: null };
+
+function renderStep2() {
+  const items = TF_ITEMS.map(item => `
+    <div class="tf-item" data-key="${item.key}">
+      <div class="tf-statement">${item.statement}</div>
+      <div class="tf-buttons">
+        <button class="tf-btn" data-key="${item.key}" data-val="1">True</button>
+        <button class="tf-btn" data-key="${item.key}" data-val="0">False</button>
+      </div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="eyebrow">Module 5 · Check-in</div>
+    <h1>Understanding and application check</h1>
+    <p>Select whether the following statements are true or false.</p>
+    ${items}
+    <div class="error-text" id="tfError">Please answer all three statements before continuing.</div>
+    <button class="btn" id="tfSubmitBtn" disabled onclick="submitModule()">Complete Module</button>
+  `;
+}
+
+function attachTFHandlers() {
+  document.querySelectorAll(".tf-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.key;
+      tfState[key] = parseInt(btn.dataset.val, 10);
+      document.querySelectorAll(`.tf-btn[data-key="${key}"]`).forEach(b => {
+        b.classList.toggle("selected", b === btn);
+      });
+      checkTFComplete();
+    });
+  });
+}
+
+function checkTFComplete() {
+  const allAnswered = Object.values(tfState).every(v => v !== null);
+  document.getElementById("tfSubmitBtn").disabled = !allAnswered;
+}
+
+function renderStep3() {
+  return `
+    <div class="complete-screen">
+      <div class="complete-mark">&#10003;</div>
+      <h1>Module 5 complete</h1>
+      <p>Nice work. You can head back to your training dashboard to continue with the next module.</p>
+      <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
+    </div>
+  `;
+}
+
+async function submitModule() {
+  const btn = document.getElementById("tfSubmitBtn");
+  const errorText = document.getElementById("tfError");
+  errorText.style.display = "none";
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+  const payload = {
+    token: TOKEN,
+    m5_tf_1: tfState.tf_1,
+    m5_tf_2: tfState.tf_2,
+    m5_tf_3: tfState.tf_3,
+    m5_started_ts: formatRedcapDatetime(START_TS)
+  };
+
+  try {
+    const res = await fetch(CONFIG.submitEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("submit failed");
+    goToStep(3);
+  } catch (err) {
+    console.error("module5 submit failed:", err);
+    errorText.textContent = "Something went wrong saving your responses. Please try again.";
+    errorText.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Complete Module";
+  }
+}
+
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="eyebrow">Before the Event</div>
+    <h1>This link looks incomplete.</h1>
+    <p>Please use the link from your training email to access this module.</p>
+  `;
+} else {
+  render();
+}
+</script>
+
+</body>
+</html>
