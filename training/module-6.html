@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 — Ending Your Dates</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--crimson);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.btn { margin-top: 24px; }
+
+/* Click-to-reveal quote cards */
+.quote-list { margin: 24px 0; }
+.quote-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.quote-card:hover { border-color: var(--crimson-soft); }
+.quote-card.flipped { border-color: var(--crimson); box-shadow: 0 4px 16px rgba(158,27,50,0.08); }
+
+.quote-prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.quote-prompt-icon {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  color: var(--crimson);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.quote-card.flipped .quote-prompt-icon { background: var(--crimson); color: #fff; }
+.quote-hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  padding-left: 36px;
+}
+.quote-reveal {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--crimson);
+  padding-left: 36px;
+}
+.quote-card.flipped .quote-reveal { display: block; }
+.quote-card.flipped .quote-hint { display: none; }
+
+/* Completion screen */
+.complete-screen { text-align: center; padding: 40px 0; }
+.complete-mark {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--crimson);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 24px;
+}
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--crimson);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:50%"></div></div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const CONFIG = {
+  submitEndpoint: "https://module6-submit.bthall3.workers.dev", // TODO: confirm once deployed
+  returnUrl: "./"
+};
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+const TOKEN = getToken();
+
+const START_TS = new Date();
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+let step = 1;
+const TOTAL_STEPS = 2;
+
+const CLOSING_LINES = [
+  "You were really fun to talk to!",
+  "You're pretty funny. I hope we can talk again sometime.",
+  "I really enjoyed this. I hope we can hang out again when we have more time to talk."
+];
+
+function setProgress() {
+  document.getElementById("progressFill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
+}
+
+function goToStep(n) {
+  step = n;
+  setProgress();
+  render();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const renderers = [renderStep1, renderStep2];
+  app.innerHTML = renderers[step - 1]();
+
+  if (step === 1) attachQuoteHandlers();
+}
+
+function renderStep1() {
+  const cards = CLOSING_LINES.map((line, i) => `
+    <div class="quote-card" data-index="${i}">
+      <div class="quote-prompt">
+        <div class="quote-prompt-icon">${i + 1}</div>
+        <span>Tap to see an example closing line</span>
+      </div>
+      <div class="quote-hint"></div>
+      <div class="quote-reveal">"${line}"</div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="eyebrow">Module 6 · Part 6 of 7</div>
+    <h1>Ending your dates</h1>
+    <p>When the timer goes off at the end of your date, instead of just moving on, you can take the last few moments with your date to give them a compliment, mention how much you enjoyed talking to them, or, if you felt a connection with your date, mention how you would love to talk to them or see them again sometime. All of these things can be flattering and validating to your date, but make sure you actually mean them and they are relevant to the conversation you just had.</p>
+    <div class="quote-list">${cards}</div>
+    <button class="btn" onclick="submitModule()" id="continueBtn">Complete Module</button>
+  `;
+}
+
+function attachQuoteHandlers() {
+  document.querySelectorAll(".quote-card").forEach(card => {
+    card.addEventListener("click", () => card.classList.toggle("flipped"));
+  });
+}
+
+function renderStep2() {
+  return `
+    <div class="complete-screen">
+      <div class="complete-mark">&#10003;</div>
+      <h1>Module 6 complete</h1>
+      <p>Nice work. You can head back to your training dashboard to continue with the next module.</p>
+      <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
+    </div>
+  `;
+}
+
+async function submitModule() {
+  const btn = document.getElementById("continueBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+  const payload = {
+    token: TOKEN,
+    m6_started_ts: formatRedcapDatetime(START_TS)
+  };
+
+  try {
+    const res = await fetch(CONFIG.submitEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("submit failed");
+    goToStep(2);
+  } catch (err) {
+    console.error("module6 submit failed:", err);
+    btn.disabled = false;
+    btn.textContent = "Complete Module";
+  }
+}
+
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="eyebrow">Before the Event</div>
+    <h1>This link looks incomplete.</h1>
+    <p>Please use the link from your training email to access this module.</p>
+  `;
+} else {
+  render();
+}
+</script>
+
+</body>
+</html>
