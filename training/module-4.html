@@ -68,6 +68,7 @@ h1 {
   aspect-ratio: 3 / 4;
 }
 .figure-svg-wrap svg { width: 100%; height: 100%; display: block; }
+.figure-svg-wrap img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 8px; }
 
 .dot {
   position: absolute;
@@ -120,6 +121,8 @@ h1 {
   margin-top: 14px;
 }
 
+.error-text { margin-top: 10px; }
+
 /* Completion screen */
 .complete-screen { text-align: center; padding: 40px 0; }
 .complete-mark {
@@ -145,7 +148,7 @@ h1 {
 <body>
 
 <div class="wrap">
-  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:16%"></div></div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
   <div id="app"></div>
 </div>
 
@@ -170,14 +173,23 @@ function formatRedcapDatetime(d) {
 }
 
 let step = 1;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 4;
 
 /* =========================================================================
    FIGURES — simple original line-art illustrations, not photos.
-   TODO: once real photos exist, swap the SVGs below for <img> tags and
-   reposition each dot's "pos" (percentage x/y within the image) to match
-   the actual photo content — dot placement is inherently tied to the
-   specific image used.
+
+   TO SWAP IN REAL PHOTOS LATER:
+   1. Upload the photo files (e.g. effective-1.jpg) into training/ on GitHub,
+      alongside this file.
+   2. In each figure object below, replace the `svg: "faceSmile"` line with
+      `img: "effective-1.jpg"` (matching whatever filename you uploaded).
+   3. In renderFigureCard(), the code already checks for `fig.img` first and
+      will render an <img> tag instead of the inline SVG automatically —
+      no other code changes needed.
+   4. Reposition each dot's `pos: [x, y]` (percentage across/down the image)
+      to match where that tip's subject actually appears in the real photo.
+      This step matters most — the illustration's proportions won't match
+      a real photo, so dots will likely need to move.
    ========================================================================= */
 const FIGURE_SVGS = {
   faceSmile: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
@@ -275,6 +287,10 @@ function allDotsViewed(figures) {
 }
 
 function renderFigureCard(fig) {
+  const media = fig.img
+    ? `<img src="${fig.img}" alt="${fig.caption}">`
+    : FIGURE_SVGS[fig.svg];
+
   const dots = fig.dots.map((d, i) => `
     <div class="dot" data-fig="${fig.id}" data-dot="${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">+</div>
     <div class="tip-popover" id="tip-${fig.id}-${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">${d.tip}</div>
@@ -283,7 +299,7 @@ function renderFigureCard(fig) {
   return `
     <div class="figure-card">
       <div class="figure-svg-wrap">
-        ${FIGURE_SVGS[fig.svg]}
+        ${media}
         ${dots}
       </div>
       <div class="figure-caption">${fig.caption}</div>
@@ -323,7 +339,7 @@ function goToStep(n) {
 
 function render() {
   const app = document.getElementById("app");
-  const renderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6];
+  const renderers = [renderStep1, renderStep2, renderStep3, renderStep4];
   app.innerHTML = renderers[step - 1]();
 
   if (step === 2) {
@@ -381,33 +397,12 @@ function renderStep3() {
     </div>
     <div class="dots-progress" id="ineffectiveProgress"></div>
     <div class="gate-note" id="ineffectiveGateNote"></div>
-    <button class="btn" id="ineffectiveContinueBtn" disabled onclick="goToStep(4)">Continue</button>
+    <div class="error-text" id="finishError">Something went wrong saving your progress. Please try again.</div>
+    <button class="btn" id="ineffectiveContinueBtn" disabled onclick="submitModule()">Complete Module</button>
   `;
 }
 
 function renderStep4() {
-  return `
-    <div class="eyebrow">Module 4 · Part 4 of 7</div>
-    <h1>Help! I'm not attracted to my date!</h1>
-    <p>It is likely that you will be more immediately attracted to some dates more than others. However, many successful couples report that they were not super attracted to their partner in the beginning. So, even if you don't feel an immediate spark, give your date a chance and try to get to know them. You might realize you like them more than you thought you would.</p>
-    <button class="btn" onclick="goToStep(5)">Continue</button>
-  `;
-}
-
-function renderStep5() {
-  return `
-    <div class="eyebrow">Module 4 · Part 4 of 7</div>
-    <h1>Responding to your date</h1>
-    <p>No two people are exactly alike, so none of your dates will be exactly alike. Because of this, it's important to be responsive to the unique personality of your date. A good dater "knows their audience" and adjusts their approach accordingly.</p>
-    <p><strong>Does your date seem shy?</strong> Try to be reassuring and make your date comfortable. You can also switch to questions that accommodate someone less comfortable with self-disclosure, or ask more follow-up questions about something they seem comfortable talking about.</p>
-    <p><strong>Does your date seem nervous?</strong> You can help ease your date's nerves by remaining calm yourself. You can also directly address any nervousness they share — but avoid asking your date if they're nervous. For instance, if they mention worrying about their outfit and you think it looks good, that's a perfect opportunity to tell them, which can boost their confidence.</p>
-    <p><strong>Does your date seem uninterested?</strong> We often misread situations — a date seeming uninterested may actually mean they're nervous or shy. It's best to continue trying to get to know your date rather than give up.</p>
-    <div class="error-text" id="finishError">Something went wrong saving your progress. Please try again.</div>
-    <button class="btn" id="finishBtn" onclick="submitModule()">Complete Module</button>
-  `;
-}
-
-function renderStep6() {
   return `
     <div class="complete-screen">
       <div class="complete-mark">&#10003;</div>
@@ -419,7 +414,7 @@ function renderStep6() {
 }
 
 async function submitModule() {
-  const btn = document.getElementById("finishBtn");
+  const btn = document.getElementById("ineffectiveContinueBtn");
   const errorText = document.getElementById("finishError");
   errorText.style.display = "none";
   btn.disabled = true;
@@ -440,7 +435,7 @@ async function submitModule() {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error("submit failed");
-    goToStep(6);
+    goToStep(4);
   } catch (err) {
     console.error("module4 submit failed:", err);
     errorText.style.display = "block";
