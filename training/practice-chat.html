@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice Date</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crimson);
+  margin-bottom: 14px;
+}
+h1 { font-size: 28px; line-height: 1.2; }
+
+.btn { margin-top: 24px; }
+
+/* Intro screen */
+.intro-list { margin: 20px 0; padding-left: 20px; }
+.intro-list li { font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); margin-bottom: 6px; }
+
+/* Chat screen */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid var(--line);
+  margin-bottom: 16px;
+}
+.chat-partner { display: flex; align-items: center; gap: 10px; }
+.chat-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--terracotta);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.chat-partner-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 500; }
+.chat-timer {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+}
+.chat-timer.warning { color: var(--gold); border-color: var(--gold); }
+.chat-timer.critical { color: var(--crimson); border-color: var(--crimson); }
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.msg {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.msg.them {
+  align-self: flex-start;
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-bottom-left-radius: 4px;
+}
+.msg.me {
+  align-self: flex-end;
+  background: var(--crimson);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.msg.typing { color: var(--ink-soft); font-style: italic; }
+
+.chat-input-row {
+  display: flex;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--line);
+}
+.chat-input-row textarea {
+  flex: 1;
+  resize: none;
+  min-height: 44px;
+  max-height: 100px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14.5px;
+  color: var(--ink);
+  background: var(--bg-card);
+}
+.chat-input-row textarea:focus { outline: none; border-color: var(--crimson); }
+.chat-input-row textarea:disabled { opacity: 0.5; }
+.send-btn {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  background: var(--crimson);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.send-btn:disabled { background: var(--line); cursor: not-allowed; }
+
+/* Feedback screen */
+.feedback-loading {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--ink-soft);
+}
+.feedback-loading .spinner {
+  width: 28px; height: 28px;
+  border-width: 3px;
+  border-color: rgba(158,27,50,0.2);
+  border-top-color: var(--crimson);
+  margin-bottom: 16px;
+}
+
+.rating-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 12px;
+}
+.rating-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rating-label { font-family: 'Lora', serif; font-size: 15px; font-weight: 500; }
+.rating-stars { display: flex; gap: 3px; }
+.rating-star { width: 16px; height: 16px; border-radius: 50%; background: var(--line); }
+.rating-star.filled { background: var(--crimson); }
+.rating-comment { font-size: 13.5px; line-height: 1.6; color: var(--ink-soft); }
+
+.overall-note {
+  background: var(--terracotta);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin: 20px 0;
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.feedback-error {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-soft);
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--crimson);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* =========================================================================
+   CONFIG
+   ========================================================================= */
+const CONFIG = {
+  chatEndpoint: "https://practice-chat.bthall3.workers.dev",       // TODO: confirm once deployed
+  feedbackEndpoint: "https://practice-feedback.bthall3.workers.dev", // TODO: confirm once deployed
+  logEndpoint: "https://practice-log.bthall3.workers.dev",         // TODO: confirm once deployed
+  returnUrl: "./",
+  timerSeconds: 420 // 7 minutes
+};
+
+function getToken() {
+  return new URLSearchParams(window.location.search).get("token");
+}
+const TOKEN = getToken();
+
+let screen = "intro"; // intro | chat | feedback
+let transcript = [];  // [{role: "user"|"assistant", content, timestamp}]
+let persona = null;   // assigned by the server on the first /practice/chat call
+let secondsLeft = CONFIG.timerSeconds;
+let timerInterval = null;
+let chatStartedTs = null;
+let sessionEnded = false;
+let feedbackResult = null;
+
+function nowIso() {
+  return new Date().toISOString();
+}
+function formatRedcapDatetime(d) {
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  if (screen === "intro") app.innerHTML = renderIntro();
+  if (screen === "chat") app.innerHTML = renderChat();
+  if (screen === "feedback") app.innerHTML = renderFeedback();
+
+  if (screen === "chat") attachChatHandlers();
+}
+
+/* ---- Intro screen ---- */
+function renderIntro() {
+  return `
+    <div class="eyebrow">Module 7 · Practice Date</div>
+    <h1>Ready to practice?</h1>
+    <p>You're about to have a short practice conversation with an AI playing the role of a date. A few things to know:</p>
+    <ul class="intro-list">
+      <li>The conversation runs for 7 minutes, on a timer — just like a real date at the event.</li>
+      <li>Try to apply what you learned in the earlier modules: a good opener, real follow-up questions, and paying attention to how your date is responding to you.</li>
+      <li>When time runs out, you'll get personalized feedback based on the conversation.</li>
+      <li>Stay respectful and appropriate, same as you would at the real event.</li>
+    </ul>
+    <button class="btn" onclick="startChat()">Start the conversation</button>
+  `;
+}
+
+/* ---- Chat screen ---- */
+function renderChat() {
+  const bubbles = transcript.map(m => `
+    <div class="msg ${m.role === 'user' ? 'me' : 'them'}">${escapeHtml(m.content)}</div>
+  `).join("");
+
+  return `
+    <div class="chat-header">
+      <div class="chat-partner">
+        <div class="chat-avatar">🙂</div>
+        <div class="chat-partner-name">Your date</div>
+      </div>
+      <div class="chat-timer" id="chatTimer">${formatTime(secondsLeft)}</div>
+    </div>
+    <div class="messages" id="messages">${bubbles}</div>
+    <div class="chat-input-row">
+      <textarea id="chatInput" placeholder="Type your message..." rows="1"></textarea>
+      <button class="send-btn" id="sendBtn">&rarr;</button>
+    </div>
+  `;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
+function scrollMessagesToBottom() {
+  const el = document.getElementById("messages");
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function attachChatHandlers() {
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  scrollMessagesToBottom();
+}
+
+async function startChat() {
+  screen = "chat";
+  chatStartedTs = new Date();
+  render();
+  startTimer();
+
+  // Kick off the opening line from the date's persona — empty transcript,
+  // no persona yet, the Worker assigns one and returns it.
+  await requestReply();
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    const timerEl = document.getElementById("chatTimer");
+    if (timerEl) {
+      timerEl.textContent = formatTime(secondsLeft);
+      timerEl.classList.toggle("warning", secondsLeft <= 60 && secondsLeft > 30);
+      timerEl.classList.toggle("critical", secondsLeft <= 30);
+    }
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      endSession();
+    }
+  }, 1000);
+}
+
+async function sendMessage() {
+  if (sessionEnded) return;
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  transcript.push({ role: "user", content: text, timestamp: nowIso() });
+  input.value = "";
+  input.disabled = true;
+  document.getElementById("sendBtn").disabled = true;
+  render();
+  scrollMessagesToBottom();
+
+  await requestReply();
+}
+
+async function requestReply() {
+  const messagesEl = document.getElementById("messages");
+  if (messagesEl) {
+    const typing = document.createElement("div");
+    typing.className = "msg them typing";
+    typing.id = "typingIndicator";
+    typing.textContent = "...";
+    messagesEl.appendChild(typing);
+    scrollMessagesToBottom();
+  }
+
+  try {
+    const res = await fetch(CONFIG.chatEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: TOKEN,
+        persona: persona,
+        transcript: transcript.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+    if (!res.ok) throw new Error("chat request failed");
+    const data = await res.json();
+
+    if (!persona) persona = data.persona;
+    transcript.push({ role: "assistant", content: data.reply, timestamp: nowIso() });
+  } catch (err) {
+    console.error("practice chat failed:", err);
+    transcript.push({ role: "assistant", content: "(Sorry, something went wrong. Try sending your message again.)", timestamp: nowIso() });
+  } finally {
+    if (!sessionEnded) {
+      render();
+      scrollMessagesToBottom();
+      const input = document.getElementById("chatInput");
+      if (input) { input.disabled = false; input.focus(); }
+      const sendBtn = document.getElementById("sendBtn");
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  }
+}
+
+function endSession() {
+  sessionEnded = true;
+  const input = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("sendBtn");
+  if (input) input.disabled = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  screen = "feedback";
+  render();
+  requestFeedback();
+}
+
+/* ---- Feedback screen ---- */
+function renderFeedback() {
+  if (!feedbackResult && !feedbackResult?.error) {
+    return `
+      <div class="eyebrow">Module 7 · Practice Date</div>
+      <h1>Your feedback</h1>
+      <div class="feedback-loading">
+        <div class="spinner"></div>
+        <div>Looking over your conversation...</div>
+      </div>
+    `;
+  }
+
+  if (feedbackResult.error) {
+    return `
+      <div class="eyebrow">Module 7 · Practice Date</div>
+      <h1>Your feedback</h1>
+      <div class="feedback-error">
+        <p>We couldn't generate feedback for this session. Your conversation was still saved — you can continue and let the research team know if this keeps happening.</p>
+      </div>
+      <button class="btn" onclick="completeModule()">Complete Module</button>
+    `;
+  }
+
+  const cards = feedbackResult.categories.map(cat => `
+    <div class="rating-card">
+      <div class="rating-top">
+        <div class="rating-label">${cat.label}</div>
+        <div class="rating-stars">
+          ${[1,2,3,4,5].map(n => `<div class="rating-star ${n <= cat.rating ? 'filled' : ''}"></div>`).join("")}
+        </div>
+      </div>
+      <div class="rating-comment">${escapeHtml(cat.comment)}</div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="eyebrow">Module 7 · Practice Date</div>
+    <h1>Your feedback</h1>
+    <div class="overall-note">${escapeHtml(feedbackResult.overall_note)}</div>
+    ${cards}
+    <div class="error-text" id="logError">Something went wrong saving your session. Please try again.</div>
+    <button class="btn" id="completeBtn" onclick="completeModule()">Complete Module</button>
+  `;
+}
+
+async function requestFeedback() {
+  try {
+    const res = await fetch(CONFIG.feedbackEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: TOKEN,
+        persona: persona,
+        transcript: transcript.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+    if (!res.ok) throw new Error("feedback request failed");
+    feedbackResult = await res.json();
+  } catch (err) {
+    console.error("practice feedback failed:", err);
+    feedbackResult = { error: true };
+  }
+  render();
+}
+
+async function completeModule() {
+  const btn = document.getElementById("completeBtn");
+  const errorText = document.getElementById("logError");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...'; }
+  if (errorText) errorText.style.display = "none";
+
+  const durationSeconds = CONFIG.timerSeconds - Math.max(secondsLeft, 0);
+
+  const payload = {
+    token: TOKEN,
+    persona: persona,
+    transcript: transcript,
+    categories: feedbackResult && !feedbackResult.error ? feedbackResult.categories : null,
+    overall_note: feedbackResult && !feedbackResult.error ? feedbackResult.overall_note : null,
+    duration_seconds: durationSeconds,
+    chat_started_ts: chatStartedTs ? formatRedcapDatetime(chatStartedTs) : ""
+  };
+
+  try {
+    const res = await fetch(CONFIG.logEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error("log request failed");
+
+    document.getElementById("app").innerHTML = `
+      <div class="eyebrow">Module 7 · Complete</div>
+      <h1>Nice work — you're all done!</h1>
+      <p>Thanks for completing the training program. You can head back to your dashboard, or just close this page.</p>
+      <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
+    `;
+  } catch (err) {
+    console.error("practice log failed:", err);
+    if (btn) { btn.disabled = false; btn.textContent = "Complete Module"; }
+    if (errorText) errorText.style.display = "block";
+  }
+}
+
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="eyebrow">Before the Event</div>
+    <h1>This link looks incomplete.</h1>
+    <p>Please use the link from your training email to access this page.</p>
+  `;
+} else {
+  render();
+}
+</script>
+
+</body>
+</html>
