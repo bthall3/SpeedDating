@@ -356,10 +356,10 @@ const MODULES = [
   { n: 1, title: "Getting Ready",                href: "module-1.html",  condition: "all" },
   { n: 2, title: "Introducing Yourself",                         href: "module-2.html",  condition: "all" },
   { n: 3, title: "Making Conversation",      href: "module-3.html",  condition: "all" },
-  { n: 4, title: "Nonverbal Behavior",     desc: "What your posture, eye contact, and tone are already saying.",       href: "module-4.html",  condition: "all" },
-  { n: 5, title: "Additional Tips",        desc: "Small adjustments that make a noticeable difference.",               href: "module-5.html",  condition: "all" },
-  { n: 6, title: "Ending Your Dates",      desc: "Closing a conversation with warmth, clearly and on time.",           href: "module-6.html",  condition: "all" },
-  { n: 7, title: "Planning & Practice",    desc: "Run through a full mock date and get feedback before the real one.", href: "module-7.html",  condition: "practice" }
+  { n: 4, title: "Nonverbal Behavior",          href: "module-4.html",  condition: "all" },
+  { n: 5, title: "Additional Tips",                 href: "module-5.html",  condition: "all" },
+  { n: 6, title: "Ending Your Dates",                href: "module-6.html",  condition: "all" },
+  { n: 7, title: "Planning & Practice",     href: "module-7.html",  condition: "practice" }
 ];
 
 function getToken() {
@@ -433,7 +433,6 @@ function renderDashboard(token, data) {
         <div class="node">${marker}</div>
         <div class="card">
           <div class="card-title">${m.title}</div>
-          <div class="card-desc">${m.desc}</div>
           ${tag}
           <div class="card-status">${label}</div>
         </div>
