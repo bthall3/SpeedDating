@@ -50,6 +50,11 @@
   margin: 0;
 }
 
+  .sharp-letter {
+  color: var(--crimson);
+  font-weight: 600;
+}
+
 /* Progress meter */
 .meter { margin-top: 32px; }
 .meter-top {
@@ -234,7 +239,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--crimson);
+  color: var(--ink-soft);
   margin-bottom: 10px;
 }
 .welcome-h2 {
@@ -436,11 +441,12 @@ function renderDashboard(token, data) {
 
   app.innerHTML = `
     <section class="hero">
-      ${data.first_name ? `<div class="hero-eyebrow">Hi, ${data.first_name}</div>` : ""}
-    
-      <h1 class="hero-h1">Welcome to<br><em>DateS.H.A.R.P</em></h1>
-       <div class="hero-eyebrow">Skills for Handling Approach, Rapport, and Presentation</div>
-      <p class="hero-sub">Work through each module in order. You can leave and come back — your progress is saved automatically.</p>
+     ${data.first_name ? `<div class="hero-eyebrow">Hi, ${data.first_name}</div>` : ""}
+
+  <h1 class="hero-h1">Welcome to<br><strong>DateSHARP</strong></h1>
+  <p class="hero-sub">These modules will help develop <span class="sharp-letter">skills</span> for <span class="sharp-letter">handling</span> your <span class="sharp-letter">approach</span>, <span class="sharp-letter">rapport</span> building, and self-<span class="sharp-letter">presentation</span> during speed-dating events.</p>
+  <p class="hero-sub">Work through each module in order. You can leave and come back — your progress is saved automatically.</p>
+
       <div class="meter">
         <div class="meter-top">
           <span>${completeCount} of ${visible.length} complete</span>
