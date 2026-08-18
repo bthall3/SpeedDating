@@ -203,7 +203,7 @@ const CONFIG = {
   feedbackEndpoint: "https://practice-feedback.bthall3.workers.dev", // TODO: confirm once deployed
   logEndpoint: "https://practice-log.bthall3.workers.dev",         // TODO: confirm once deployed
   returnUrl: "./",
-  timerSeconds: 240 // 4 minutes
+  timerSeconds: 60 // 4 minutes
 };
 
 function getToken() {
@@ -245,7 +245,7 @@ function renderIntro() {
     <h1>Ready to practice?</h1>
     <p>You're about to have a short practice conversation with an AI playing the role of a date. A few things to know:</p>
     <ul class="intro-list">
-      <li>The conversation runs for 7 minutes, on a timer — just like a real date at the event.</li>
+      <li>The conversation runs for 4 minutes, on a timer — just like a real date at the event.</li>
       <li>Try to apply what you learned in the earlier modules: a good opener, real follow-up questions, and paying attention to how your date is responding to you.</li>
       <li>When time runs out, you'll get personalized feedback based on the conversation.</li>
       <li>Stay respectful and appropriate, same as you would at the real event.</li>
