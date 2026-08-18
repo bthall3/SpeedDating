@@ -293,7 +293,7 @@
   <div id="welcomeOverlay" class="welcome-overlay hidden">
     <div class="welcome-box">
       <div class="welcome-eyebrow">Welcome</div>
-      <h2 class="welcome-h2">Before you get started</h2>
+      <h2 class="welcome-h2">Please watch the welcome video before getting started</h2>
       <!-- TODO: replace welcome.mp4 with the real recorded video, placed in
            the same training/ folder as this file. Keep it under GitHub's
            100MB per-file cap — compress with HandBrake (H.264, modest
@@ -436,9 +436,10 @@ function renderDashboard(token, data) {
 
   app.innerHTML = `
     <section class="hero">
-      ${data.first_name ? `<div class="hero-greeting">Hi, ${data.first_name}</div>` : ""}
-      <div class="hero-eyebrow">Before the Event</div>
-      <h1 class="hero-h1">A little preparation<br><em>goes a long way.</em></h1>
+      ${data.first_name ? `<div class="hero-eyebrow">Hi, ${data.first_name}</div>` : ""}
+    
+      <h1 class="hero-h1">Welcome to<br><em>DateS.H.A.R.P</em></h1>
+       <div class="hero-eyebrow">Skills for Handling Approach, Rapport, and Presentation</div>
       <p class="hero-sub">Work through each module in order. You can leave and come back — your progress is saved automatically.</p>
       <div class="meter">
         <div class="meter-top">
