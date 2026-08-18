@@ -423,7 +423,7 @@ function renderDashboard(token, data) {
     }
 
     const label = state === "complete" ? "Complete" : state === "current" ? "Start module" : "Locked";
-    const tag = "" : "";
+    const tag = "";
     const marker = state === "complete" ? "&#10003;" : String(m.n).padStart(2, "0");
     const clickable = state !== "locked";
     const tagName = clickable ? "a" : "div";
