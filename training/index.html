@@ -353,13 +353,14 @@ const CONFIG = {
 };
 
 const MODULES = [
-  { n: 1, title: "Getting Ready",                href: "module-1.html",  condition: "all" },
-  { n: 2, title: "Introducing Yourself",                         href: "module-2.html",  condition: "all" },
-  { n: 3, title: "Making Conversation",      href: "module-3.html",  condition: "all" },
-  { n: 4, title: "Nonverbal Behavior",          href: "module-4.html",  condition: "all" },
-  { n: 5, title: "Additional Tips",                 href: "module-5.html",  condition: "all" },
-  { n: 6, title: "Ending Your Dates",                href: "module-6.html",  condition: "all" },
-  { n: 7, title: "Planning & Practice",     href: "module-7.html",  condition: "practice" }
+  { n: 1, title: "Getting Ready", desc: "Prepare for the event and calm your nerves.",href: "module-1.html",  condition: "all" },
+  { n: 2, title: "Introducing Yourself", desc: "Make lasting positive first impressions.", href: "module-2.html",  condition: "all" },
+  { n: 3, title: "Making Conversation", desc: "Keep conversation interesting and flowing.", href: "module-3.html",  condition: "all" },
+  { n: 4, title: "Nonverbal Behavior", desc: "Tips on posture, eye-contact, and other nonverbal signals.", href: "module-4.html",  condition: "all" },
+  { n: 5, title: "Additional Tips", desc: "A few more suggestions from the research team.", href: "module-5.html",  condition: "all" },
+  { n: 6, title: "Ending Your Dates", desc: "Effectively wrap-up dates.", href: "module-6.html",  condition: "all" },
+  { n: 7, title: "Planning & Practice", desc: "Apply what you've learned and practice with our DateSHARP chatbot.", 
+    href: "module-7.html",  condition: "practice" }
 ];
 
 function getToken() {
@@ -433,6 +434,7 @@ function renderDashboard(token, data) {
         <div class="node">${marker}</div>
         <div class="card">
           <div class="card-title">${m.title}</div>
+          <div class="card-desc">${m.desc}</div>
           ${tag}
           <div class="card-status">${label}</div>
         </div>
