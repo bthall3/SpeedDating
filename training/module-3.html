@@ -310,11 +310,14 @@ const TOTAL_STEPS = 7;
 let videoWatched = false;
 
 const IDEAS = [
-  { title: "Compliment-to-question", desc: `After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question: "That is a really cool shirt, where'd you get it?"`, tip: "Don't give every date the same compliment — make it specific and genuine." },
-  { title: "Make an observation", desc: "A low-stakes way to establish common ground is to make an observation about the situation — like asking if they've done speed-dating before, or how the event is going for them." },
-  { title: "Meta-framing", desc: `Break out of the typical script: "These dates always feel like an interview, we can skip the small talk and pick something more interesting if you're down?"` },
-  { title: "Organic topic escalation", desc: `If your date mentions something in their introduction (e.g., "I'm from Colorado"), use it as a bridge to a question (e.g., "Oh cool, do you like to ski?").` },
-  { title: "Get straight to the point", desc: "Sometimes being direct is the best approach — simply ask your date if you can ask them a random question and go from there." }
+  { title: "Compliment-to-question", desc: `After your date introduces themselves, offer them a compliment but immediately turn the compliment into a question: “That is a really cool shirt, where’d you get it?” Or, if someone is wearing something with a certain topic on it, you can compliment it and then ask about the topic: “I like that shirt, are you a big Braves fan?”`
+, tip: "Don’t give every one of your dates the same compliment. They may overhear and it will no longer feel special. Instead, only give compliments that you truly mean and make them specific to the person." },
+  { title: "Make an observation", desc: "A low-stakes way to establish common ground in a conversation is to make an observation about the situation. For instance, you may ask your date if they’ve done speed-dating before, or how the event is going for them so far, or how it’s a funny thing to be going on a date on campus.
+" },
+  { title: "Meta-framing", desc: `Sometimes breaking out of the typical script people expect their dates to follow can seem exciting and refreshing. To do this, you might tell your date that you want to avoid the typical speed-dating conversation and really get to know them: “These dates always feel like an interview, we can skip the small talk and pick something more interesting if you’re down?”
+` },
+  { title: "Organic topic escalation", desc: `If your date mentions something about themselves during their introduction (e.g., “I’m from Colorado.”), you can use that as a bridge to the question (e.g., “Oh cool, do you like to ski?”).` },
+  { title: "Get straight to the point", desc: "Sometimes, being direct is the best approach. After introductions, you may simply ask your date if you can ask them a random question and go from there." }
 ];
 let carouselIndex = 0;
 
@@ -408,7 +411,7 @@ function renderStep2() {
   return `
     <div class="eyebrow">Module 3 · Part 3 of 7</div>
     <h1>Beginning conversation</h1>
-    <p>There are many ways to begin a conversation with your date. Having a strong start can improve your date's impressions of you, help relax both of you, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into real conversation. Click through and consider a few you might like to try.</p>
+    <p>There are many ways to begin a conversation with your date. Having a strong start can improve your date's impressions of you, help both of you relax, and lead to a better flow of conversation. Below are five ideas to help transition from introductions into conversation. Click through and consider a few you might like to try.</p>
 
     <div class="carousel-count" id="carouselCount"></div>
     <div id="carouselCardWrap"></div>
@@ -467,9 +470,12 @@ function renderStep3() {
     <div class="dodont-table">
       <div class="dodont-col do">
         <div class="dodont-label">Do</div>
-        <div class="dodont-item">Talk about more than just demographic information — music taste, hobbies, notable experiences.</div>
-        <div class="dodont-item">Be playful and make jokes.</div>
-        <div class="dodont-item">Maintain open and inviting body language — lean in, smile, make eye contact.</div>
+        <div class="dodont-item"><strong>Talk about more than just demographic information</strong> (e.g., major, career plans). People like to hear about things that signal your personality such as music taste, film preferences, unique hobbies, notable experiences. 
+</div>
+        <div class="dodont-item"><strong>Be playful and make jokes.</strong> Don’t take the conversation too seriously.
+</div>
+        <div class="dodont-item"><strong>Maintain open and inviting body language.</strong> Keep an open and relaxed posture, lean in slightly, smile and make eye contact. Seem interested in what your date is saying and avoid letting your attention wander. 
+</div>
         <div class="dodont-item">Be authentic — let your genuine reactions show.</div>
         <div class="dodont-item">Ask follow-up questions — go deeper on one or two topics rather than shallower on several.</div>
       </div>
