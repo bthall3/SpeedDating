@@ -314,7 +314,7 @@ const IDEAS = [
 , tip: "Don’t give every one of your dates the same compliment. They may overhear and it will no longer feel special. Instead, only give compliments that you truly mean and make them specific to the person." },
   { title: "Make an observation", desc: `A low-stakes way to establish common ground in a conversation is to make an observation about the situation. For instance, you may ask your date if they’ve done speed-dating before, or how the event is going for them so far, or how it’s a funny thing to be going on a date on campus.`
 },
-  { title: "Meta-framing", desc: `Sometimes breaking out of the typical script people expect their dates to follow can seem exciting and refreshing. To do this, you might tell your date that you want to avoid the typical speed-dating conversation and really get to know them: “These dates always feel like an interview, we can skip the small talk and pick something more interesting if you’re down?”
+  { title: "Meta-framing", desc: `Sometimes breaking out of the typical script people expect their dates to follow can seem exciting and refreshing. To do this, you might tell your date that you want to avoid the typical speed-dating conversation and really get to know them: “These dates always feel like an interview, we can skip the small talk and pick something more interesting if you’re down?”
 ` },
   { title: "Organic topic escalation", desc: `If your date mentions something about themselves during their introduction (e.g., “I’m from Colorado.”), you can use that as a bridge to the question (e.g., “Oh cool, do you like to ski?”).` },
   { title: "Get straight to the point", desc: "Sometimes, being direct is the best approach. After introductions, you may simply ask your date if you can ask them a random question and go from there." }
@@ -514,8 +514,11 @@ function renderStep4() {
   return `
     <div class="eyebrow">Module 3 · Part 3 of 7</div>
     <h1>Developing a deeper connection</h1>
-    <p>Research suggests that escalating self-disclosure increases interpersonal closeness. On a date, you can take turns asking one another questions that gradually increase in how "personal" they are — divided into three levels. Speed dates are short, so you may only get through one question, and that's OK. Depth of conversation is often better than breadth.</p>
-    <p>Below are a few example questions for each level. We encourage you to generate your own similar questions so your dates don't hear the same ones from multiple people. Write one for each level below.</p>
+    <p>While small talk is natural in speed-dating settings, research suggests that <span style="color: var(--crimson;">escalating self-disclosure</span> increases interpersonal closeness. On a date, individuals can engage in escalating self-disclosure by taking turns asking one another questions that gradually increase in how “personal” they are. These questions are based in research on making strangers feel close to one another and are divided into three levels. 
+<br/>The process works best if partners answer at least one question from each level in order and take turns answering each question. However, speed dates are rather short, so you may not have time to ask three questions. It is OK if you and your partner end up talking about one question the entire time. In fact, depth of conversation is often better than breadth of conversation. 
+</p>
+    <p>Below are a few example questions for each level. While you are free to use these questions, we encourage you to generate some similar questions of your own that you might want to ask your dates so people don’t hear the same questions from multiple dates. Use the boxes below to write out your own Level 1, 2, and 3 question(s).
+</p>
 
     ${levelBlocks}
 
@@ -546,7 +549,8 @@ function renderStep5() {
   return `
     <div class="eyebrow">Module 3 · Part 3 of 7</div>
     <h1>Creating your own little world</h1>
-    <p>Another effective strategy that increases closeness is developing what relationship researchers call a "microculture." While hard to build in just a few minutes, you can try to find unique things you and your date have in common or make shared observations. Watch the video below for an example — be sure any observation you make is genuinely unique to that date.</p>
+    <p>Another effective strategy that increases closeness between people is the development of what relationship researchers call the “microculture.” While this is difficult to develop over the course of just a few minutes, you can try and find unique things that you and your date have in common or make shared observations. This can create a special relationship between you and your date that other people can’t replicate. <strong>But be sure that it is indeed unique to your date</strong> (i.e., don’t make the same observation for every date). Watch the video below for a good example of this.
+</p>
 
     <div class="video-block">
       <!-- TODO: replace microculture-video.mp4 with the real recorded video,
@@ -598,7 +602,8 @@ function renderStep6() {
     <div class="eyebrow">Module 3 · Check-in</div>
     <h1>Understanding and application check</h1>
 
-    <div class="check-section-label">Rank these approaches from 1 (most comfortable trying) to 5 (least comfortable trying). Each number can only be used once.</div>
+    <div class="check-section-label">Rank the approaches of beginning conversation after introducing yourself, with 1 being the approach you are most comfortable and confident in trying and 5 being the approach you are least comfortable and confident in trying.
+ Each number can only be used once.</div>
     ${rankRows}
 
     <div class="check-section-label">Sort each behavior into Do or Don't.</div>
