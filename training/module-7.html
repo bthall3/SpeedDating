@@ -125,7 +125,7 @@ function render() {
   document.getElementById("app").innerHTML = `
     <div class="eyebrow">Module 7 - Planning & Practice</div>
     <h1>Planning</h1>
-    <p>In most areas of life, success is often mostly attributable to proper planning. The information presented in these modules is valuable but becomes much more valuable if you plan on how to implement it.</p>
+    <p>In most areas of life, success is often mostly attributable to proper planning. The information presented in these modules is valuable but becomes <strong>much</strong> more valuable if you plan on how to implement it.</p>
     <p>Use the boxes below to write out some conversation starters, topics, and follow-up questions. After you've written some ideas down, you can click "Email me" to have these ideas sent to your email so you can reference them. You can also return to this page later to add more ideas.</p>
 
     <div class="plan-block">
@@ -149,7 +149,7 @@ function render() {
     <div class="save-status" id="saveStatus"></div>
 
     <div class="continue-block">
-      <p>Finally, you'll be given an opportunity to go on a "practice date" with an automated chatbot designed for this study, which will simulate various types of dates you might encounter to give you practice with thinking on your feet.</p>
+      <p>Finally, you'll be given an opportunity to go on a "practice date" with an AI-powered chatbot designed for this study, which will simulate various types of dates you might encounter to give you practice with thinking on your feet.</p>
       <a class="btn" href="${CONFIG.practiceChatUrl}?token=${encodeURIComponent(TOKEN || "")}">Continue to practice date</a>
     </div>
   `;
