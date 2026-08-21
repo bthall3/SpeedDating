@@ -186,7 +186,7 @@ function render() {
 
 function renderStep1() {
   return `
-    <div class="eyebrow">Module 2 · Part 2 of 7</div>
+    <div class="eyebrow">Module 2</div>
     <h1>Making a good first impression</h1>
     <p>Because speed-dating dates are "blind" dates, you will have to introduce yourself to each of your dates. This provides an opportunity to make a good first impression. Research has shown that we form first impressions very quickly, and those impressions are often hard to change. So, starting your date strong can increase your chances of making a positive first impression.</p>
     <p>The following section covers the time from first meeting your date to beginning conversation.</p>
@@ -225,14 +225,15 @@ function renderStep2() {
       </video>
       <div class="video-script">
         <strong>You:</strong> "Hi, I'm [your name], it's nice to meet you!"<br>
-        <strong>Them:</strong> "Hi, I'm [their name], nice to meet you too!"
+        <strong>Them:</strong> "Hi, I'm [their name], nice to meet you too!"<br>
+        <strong>You:</strong> "Hi, [their name]..."
       </div>
       <div class="watched-flag" id="watchedFlag2">○ Watch to continue</div>
     </div>
 
     <div class="tip-block">
       <span class="tip-label">Tip</span>
-      Did you notice how the person introducing themselves in the video said their date's name during introductions? Research has demonstrated that people like being called their name because it demonstrates that people are listening to and interested in them.
+      Did you notice how the person introducing themselves in the video said their date's name during introductions? Research has shown that people like being called their name because it demonstrates that people are listening to and interested in them.
     </div>
 
     <div class="gate-note" id="gateNote">Watch both videos above to continue.</div>
@@ -257,7 +258,7 @@ function markWatched(n) {
   const bothWatched = watched.v1 && watched.v2;
   document.getElementById("continueBtn").disabled = !bothWatched;
   document.getElementById("gateNote").textContent = bothWatched
-    ? "Both videos watched — you're ready to continue."
+    ? "Both videos watched."
     : "Watch both videos above to continue.";
 }
 
