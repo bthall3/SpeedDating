@@ -243,12 +243,14 @@ function renderIntro() {
   return `
     <div class="eyebrow">Module 7 · Practice Date</div>
     <h1>Ready to practice?</h1>
-    <p>You're about to have a short practice conversation with an AI playing the role of a date. A few things to know:</p>
+    <p>You're about to have a short practice conversation with an AI chatbot playing the role of a date. The chatbot  has been trained on the information presented throughout these modules. A few things to know:</p>
     <ul class="intro-list">
-      <li>The conversation runs for 4 minutes, on a timer — just like a real date at the event.</li>
-      <li>Try to apply what you learned in the earlier modules: a good opener, real follow-up questions, and paying attention to how your date is responding to you.</li>
-      <li>When time runs out, you'll get personalized feedback based on the conversation.</li>
-      <li>Stay respectful and appropriate, same as you would at the real event.</li>
+      <li>The conversation will last 4 minutes, just like a real date at the event.</li>
+      <li>We understand that this is not directly comparable to interacting with a real person, but it provides a low-stakes opportunity to try out different ideas. </li>
+      <li>At the end of the conversation, the chatbot will provide brief feedback regarding your messages. 
+</li>
+
+       
     </ul>
     <button class="btn" onclick="startChat()">Start the conversation</button>
   `;
@@ -498,8 +500,8 @@ async function completeModule() {
 
     document.getElementById("app").innerHTML = `
       <div class="eyebrow">Module 7 · Complete</div>
-      <h1>Nice work — you're all done!</h1>
-      <p>Thanks for completing the training program. You can head back to your dashboard, or just close this page.</p>
+      <h1>Nice work. You're all done!</h1>
+      <p>Thanks for completing the DateSHARP program. You can head back to your dashboard, or close this page.</p>
       <a class="back-link" href="${CONFIG.returnUrl}?token=${encodeURIComponent(TOKEN || "")}">&larr; Back to your training</a>
     `;
   } catch (err) {
