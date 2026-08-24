@@ -65,7 +65,7 @@ h1 {
 .figure-svg-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
 }
 .figure-svg-wrap svg { width: 100%; height: 100%; display: block; }
 .figure-svg-wrap img { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 8px; }
@@ -97,7 +97,7 @@ h1 {
 .tip-popover {
   position: absolute;
   z-index: 5;
-  max-width: 220px;
+  max-width: 400px;
   background: var(--ink);
   color: #fff;
   font-size: 12.5px;
@@ -302,7 +302,6 @@ function renderFigureCard(fig) {
         ${media}
         ${dots}
       </div>
-      <div class="figure-caption">${fig.caption}</div>
     </div>
   `;
 }
