@@ -102,7 +102,7 @@
 
   <script>
     // Set this to your deployed Worker URL after creating it in Cloudflare.
-    const WORKER_URL = "https://compute-matches.bthall3.workers.dev/";
+    const WORKER_URL = "https://compute-matches.bthall3.workers.dev";
 
     const btn = document.getElementById("runBtn");
     const resultEl = document.getElementById("result");
@@ -141,7 +141,7 @@
             `Mutual matches found: ${data.mutualMatchesFound}\n` +
             `People emailed: ${data.peopleProcessed}\n` +
             (data.alreadyProcessedSkipped ? `Already processed (skipped): ${data.alreadyProcessedSkipped}\n` : "") +
-            (data.diagnostics ? `\nRaw rows from REDCap: ${data.diagnostics.rawRowsFromRedcap}\nRows matching scorecard instrument: ${data.diagnostics.rowsMatchingScorecardInstrument}\nSample raw row: ${JSON.stringify(data.diagnostics.sampleRawRow)}\n` : "") +
+            (data.diagnostics ? `\nAttendees (event_num match): ${data.diagnostics.attendeesFromEventNum}\nFull rows returned: ${data.diagnostics.fullRowsReturned}\nScorecard rows found: ${data.diagnostics.scorecardRowsFound}\n` + (data.diagnostics.unresolvedPartnerPids.length ? `Unresolved partner PIDs (typos?): ${data.diagnostics.unresolvedPartnerPids.join(", ")}\n` : "") : "") +
             (previewText ? `\nPer-person preview:\n${previewText}` : ""),
             false
           );
