@@ -4,19 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Scorecard Entry</title>
+<link rel="stylesheet" href="styles.css">
 <style>
+  /* ---- Intentionally NOT using the crimson/cream tokens from styles.css.
+     This mirrors the physical paper scorecard as closely as possible:
+     Georgia serif, stacked trait/statement tables in the same order as
+     the paper card, comfortable full-size tap targets. Scrolling is fine
+     here — legibility and matching the paper card matter more than
+     fitting one screen. Black-and-white only, no color accents. ---- */
   :root {
     --ink: #1A1A1A;
     --line: #2A2A2A;
     --line-soft: #C7C7C2;
     --bg: #FFFFFF;
     --page: #EAEAE7;
-    --accent: #2E6F6B;
-    --no: #B3392F;
-    --warn-soft: #FBEAE8;
+    --accent: #1A1A1A;
+    --no: #1A1A1A;
+    --warn-soft: #EFEFEF;
   }
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { -webkit-tap-highlight-color: transparent; }
 
   html, body {
     margin: 0;
@@ -74,7 +81,7 @@
 
   .rotate-hint .box { max-width: 320px; }
   .rotate-hint .icon { font-size: 40px; margin-bottom: 14px; }
-  .rotate-hint h2 { font-size: 17px; margin: 0 0 8px; }
+  .rotate-hint h2 { font-size: 17px; margin: 0 0 8px; color: #fff; }
   .rotate-hint p { font-size: 13px; opacity: 0.75; margin: 0; }
 
   @media (orientation: portrait) {
@@ -132,7 +139,7 @@
   }
 
   .id-field input:focus { outline: none; background: #F5F5F5; }
-  .id-field input.error { border-bottom-color: var(--no); background: var(--warn-soft); }
+  .id-field input.error { border-bottom-width: 3px; background: var(--warn-soft); }
 
   .instruction {
     font-size: 14px;
@@ -164,8 +171,8 @@
   }
 
   table.scorecard tbody tr.error td.label {
-    color: var(--no);
     font-weight: 700;
+    text-decoration: underline;
   }
 
   table.scorecard td.cell {
@@ -181,8 +188,8 @@
   }
 
   table.scorecard td.cell.selected {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--ink);
+    border-color: var(--ink);
     color: #fff;
     font-weight: 700;
   }
@@ -219,8 +226,7 @@
     color: var(--ink);
   }
 
-  .choice-btn.yes.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .choice-btn.no.selected { background: var(--no); border-color: var(--no); color: #fff; }
+  .choice-btn.selected { background: var(--ink); border-color: var(--ink); color: #fff; }
 
   .submit-bar {
     position: fixed;
@@ -239,7 +245,7 @@
   #submitBtn {
     width: 100%;
     height: 52px;
-    background: var(--accent);
+    background: var(--ink);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -251,9 +257,7 @@
 
   #submitBtn:disabled { background: #A8B0BA; }
 
-  #statusMsg { text-align: center; font-size: 12px; margin-top: 7px; min-height: 15px; }
-  #statusMsg.success { color: var(--accent); font-weight: 700; }
-  #statusMsg.error { color: var(--no); font-weight: 700; }
+  #statusMsg { text-align: center; font-size: 12px; margin-top: 7px; min-height: 15px; font-weight: 700; }
 
   .event-modal {
     position: fixed; inset: 0; background: rgba(20,20,20,0.6);
@@ -277,7 +281,7 @@
     font-family: "SF Mono", monospace; text-align: center; font-size: 20px;
   }
   .event-modal button {
-    width: 100%; height: 48px; background: var(--accent); color: #fff; border: none;
+    width: 100%; height: 48px; background: var(--ink); color: #fff; border: none;
     border-radius: 7px; font-size: 14px; font-weight: 700; margin-top: 4px;
   }
 </style>
@@ -346,8 +350,8 @@
     <div class="choice-block">
       <div class="q">Would you like to see your date again?</div>
       <div class="choice-row">
-        <button class="choice-btn yes" id="choiceYes">Yes</button>
-        <button class="choice-btn no" id="choiceNo">No</button>
+        <button class="choice-btn" id="choiceYes">Yes</button>
+        <button class="choice-btn" id="choiceNo">No</button>
       </div>
     </div>
 
@@ -561,7 +565,6 @@
 
   submitBtn.addEventListener("click", async () => {
     statusMsg.textContent = "";
-    statusMsg.className = "";
 
     if (!getEvent() || !getRAInput()) {
       eventModal.classList.remove("hidden");
@@ -570,7 +573,6 @@
 
     if (!validate()) {
       statusMsg.textContent = "Fill in every field before submitting.";
-      statusMsg.className = "error";
       return;
     }
 
@@ -585,8 +587,7 @@
     };
 
     submitBtn.disabled = true;
-    statusMsg.textContent = "Submitting\u2026";
-    statusMsg.className = "";
+    statusMsg.textContent = "Submitting…";
 
     try {
       const res = await fetch(SUBMIT_ENDPOINT, {
@@ -603,11 +604,9 @@
       localStorage.setItem("scorecard_count", String(getCount() + 1));
       refreshHeader();
       statusMsg.textContent = "Saved.";
-      statusMsg.className = "success";
       resetForm();
     } catch (err) {
       statusMsg.textContent = "Failed to save — check connection and try again.";
-      statusMsg.className = "error";
     } finally {
       submitBtn.disabled = false;
     }
