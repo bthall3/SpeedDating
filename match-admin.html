@@ -95,13 +95,14 @@
     <input type="password" id="secret" />
 
     <button id="runBtn">Compute & Send Matches</button>
+    <button id="csvBtn" style="margin-top:0.6rem; background:#fff; color:var(--crimson); border:1px solid var(--crimson);">Download CSV Summary</button>
 
     <div id="result"></div>
   </div>
 
   <script>
     // Set this to your deployed Worker URL after creating it in Cloudflare.
-    const WORKER_URL = "https://compute-matches.bthall3.workers.dev";
+    const WORKER_URL = "https://compute-matches.YOUR-SUBDOMAIN.workers.dev";
 
     const btn = document.getElementById("runBtn");
     const resultEl = document.getElementById("result");
@@ -130,12 +131,18 @@
         if (!res.ok) {
           showResult("Error: " + (data.error || res.status), true);
         } else {
+          const previewText = (data.preview || [])
+            .map((p) => `  ${p.record_id}: ${p.match_count} match(es)${p.matched_with.length ? " — " + p.matched_with.join(", ") : ""}`)
+            .join("\n");
+
           showResult(
             `Event ${data.event}\n` +
             `Attendees found: ${data.attendeesFound}\n` +
             `Mutual matches found: ${data.mutualMatchesFound}\n` +
             `People emailed: ${data.peopleProcessed}\n` +
-            (data.alreadyProcessedSkipped ? `Already processed (skipped): ${data.alreadyProcessedSkipped}\n` : ""),
+            (data.alreadyProcessedSkipped ? `Already processed (skipped): ${data.alreadyProcessedSkipped}\n` : "") +
+            (data.diagnostics ? `\nRaw rows from REDCap: ${data.diagnostics.rawRowsFromRedcap}\nRows matching scorecard instrument: ${data.diagnostics.rowsMatchingScorecardInstrument}\n` : "") +
+            (previewText ? `\nPer-person preview:\n${previewText}` : ""),
             false
           );
         }
@@ -144,6 +151,44 @@
       } finally {
         btn.disabled = false;
         btn.textContent = "Compute & Send Matches";
+      }
+    });
+
+    document.getElementById("csvBtn").addEventListener("click", async () => {
+      const event = document.getElementById("event").value.trim();
+      const adminSecret = document.getElementById("secret").value;
+
+      if (!event || !adminSecret) {
+        showResult("Enter both an event number and the admin password.", true);
+        return;
+      }
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event, adminSecret, format: "csv" }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          showResult("Error: " + (data.error || res.status), true);
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `matches-event-${event}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        showResult("CSV downloaded. Move it to Box/OneDrive per IRB storage requirements — don't leave it sitting in Downloads.", false);
+      } catch (err) {
+        showResult("Network error: " + err.message, true);
       }
     });
 
