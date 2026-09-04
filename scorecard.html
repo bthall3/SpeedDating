@@ -554,7 +554,9 @@
   function resetForm() {
     raterInput.value = "";
     partnerInput.value = "";
-    state = { traits: {}, statements: {}, choice: null };
+    for (const k in state.traits) delete state.traits[k];
+    for (const k in state.statements) delete state.statements[k];
+    state.choice = null;
     document.querySelectorAll("td.cell.selected").forEach(c => c.classList.remove("selected"));
     document.querySelectorAll("tbody tr.error").forEach(r => r.classList.remove("error"));
     choiceYes.classList.remove("selected");
