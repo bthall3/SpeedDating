@@ -91,12 +91,29 @@ input[type="email"]:focus {
   color: var(--ink-soft);
 }
 
+.scale-anchors {
+  display: grid;
+  grid-template-columns: 120px repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.scale-anchors span {
+  text-align: center;
+  font-size: 10px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
 .tap-target {
   aspect-ratio: 1;
+  width: 44px;
+  max-width: 44px;
+  justify-self: center;
   border-radius: 50%;
   border: 2px solid var(--line);
   background: white;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   display: flex;
@@ -185,6 +202,10 @@ button.primary:disabled {
     <div class="scale-header">
       <span></span>
       <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+    </div>
+    <div class="scale-anchors">
+      <span></span>
+      <span>Not at all</span><span></span><span></span><span></span><span>Extremely</span>
     </div>
     <div id="grid-container"></div>
 
@@ -300,4 +321,3 @@ button.primary:disabled {
 
 </body>
 </html>
-
