@@ -189,9 +189,72 @@ button.primary:disabled {
   color: var(--ink-soft);
   margin-bottom: 32px;
 }
+
+.setup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 36, 31, 0.6);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.setup-box {
+  background: white;
+  border-radius: 16px;
+  max-width: 380px;
+  width: 100%;
+  padding: 28px 24px;
+}
+.setup-box h2 {
+  font-size: 18px;
+  color: var(--crimson);
+  margin: 0 0 6px;
+}
+.setup-box .subtext { margin-bottom: 20px; }
+.setup-box label {
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.setup-box input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 16px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 16px;
+}
+.setup-box input:focus { outline: none; border-color: var(--crimson); }
+.setup-change {
+  position: fixed;
+  bottom: 10px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  opacity: 0.6;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
+
+<div class="setup-overlay hidden" id="setupOverlay">
+  <div class="setup-box">
+    <h2>Set up this iPad</h2>
+    <p class="subtext">Enter the check-in access PIN for this event. Ask study staff if you don't have it.</p>
+    <label for="pinInput">Access PIN</label>
+    <input type="password" id="pinInput" autocomplete="off">
+    <button class="primary" id="pinSaveBtn">Save & Continue</button>
+  </div>
+</div>
+<button class="setup-change hidden" id="changePinBtn">change PIN</button>
 
 <div class="card">
 
@@ -233,11 +296,45 @@ button.primary:disabled {
 
 <script>
   const WORKER_URL = "https://checkin.bthall3.workers.dev";
-  // Shared secret so only this page's requests are accepted -- not a login,
-  // just a filter against opportunistic/remote abuse of the endpoint by
-  // people who never touch an event iPad. Must match CHECKIN_SHARED_SECRET
-  // set on the checkin Worker.
-  const CHECKIN_SECRET = "vOlvCa1QJoXJYnGKNUG99Uza--uK42a-gB-HkoS00sU";
+
+  // The PIN is entered by whoever sets up this iPad and kept only in this
+  // browser's localStorage -- never hardcoded in this file. It's sent to
+  // the checkin Worker so the endpoint rejects requests that never touched
+  // an event iPad. Ask study staff for the current PIN if you don't have it.
+  function getPin() { return localStorage.getItem("checkin_pin"); }
+
+  const setupOverlay = document.getElementById("setupOverlay");
+  const pinInput = document.getElementById("pinInput");
+  const pinSaveBtn = document.getElementById("pinSaveBtn");
+  const changePinBtn = document.getElementById("changePinBtn");
+  const cardEl = document.querySelector(".card");
+
+  function showSetupIfNeeded() {
+    if (getPin()) {
+      setupOverlay.classList.add("hidden");
+      cardEl.classList.remove("hidden");
+      changePinBtn.classList.remove("hidden");
+    } else {
+      setupOverlay.classList.remove("hidden");
+      cardEl.classList.add("hidden");
+      changePinBtn.classList.add("hidden");
+    }
+  }
+
+  pinSaveBtn.addEventListener("click", () => {
+    const pin = pinInput.value.trim();
+    if (!pin) return;
+    localStorage.setItem("checkin_pin", pin);
+    pinInput.value = "";
+    showSetupIfNeeded();
+  });
+
+  changePinBtn.addEventListener("click", () => {
+    pinInput.value = getPin() || "";
+    setupOverlay.classList.remove("hidden");
+  });
+
+  showSetupIfNeeded();
 
   const items = [
     { key: "state_nervous", label: "Nervous" },
@@ -300,7 +397,7 @@ button.primary:disabled {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${CHECKIN_SECRET}`
+          "Authorization": `Bearer ${getPin()}`
         },
         body: JSON.stringify({
           email: emailInput.value.trim(),

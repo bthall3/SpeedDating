@@ -376,6 +376,10 @@
       <label for="eventInput">Event Number</label>
       <input type="text" id="eventInput" placeholder="e.g. 3" inputmode="numeric">
     </div>
+    <div class="field">
+      <label for="pinInput">Access PIN</label>
+      <input type="password" id="pinInput" placeholder="Ask study staff if you don't have this" autocomplete="off">
+    </div>
     <button id="eventSaveBtn">Start Entering Scorecards</button>
   </div>
 </div>
@@ -383,11 +387,6 @@
 <script>
   // ---- CONFIG ----
   const SUBMIT_ENDPOINT = "https://scorecard-submit.bthall3.workers.dev/submit";
-  // Shared secret so only this page's requests are accepted -- not a login,
-  // just a filter against opportunistic/remote abuse of the endpoint by
-  // people who never touch an event iPad. Must match SCORECARD_SHARED_SECRET
-  // set on the scorecard-submit Worker.
-  const SUBMIT_SECRET = "Km7WiYPBFz9EwVMDDFjlte0cbY0FcRkrtSbaMpyYKM0";
 
   const TRAITS = [
     ["attractive", "Physically attractive"],
@@ -467,9 +466,16 @@
   const raNameInput = document.getElementById("raNameInput");
   const raNameDisplay = document.getElementById("raNameDisplay");
   const counterText = document.getElementById("counterText");
+  const pinInput = document.getElementById("pinInput");
 
+  // The PIN is entered by whoever sets up this iPad each session (same as
+  // RA name / event number below) and kept only in this browser's
+  // localStorage -- never hardcoded in this file. It's sent to
+  // scorecard-submit so the endpoint rejects requests that never touched
+  // an event iPad. Ask study staff for the current PIN if you don't have it.
   function getEvent() { return localStorage.getItem("scorecard_event"); }
   function getRAInput() { return localStorage.getItem("scorecard_ra_input"); }
+  function getPin() { return localStorage.getItem("scorecard_pin"); }
   function getCount() { return parseInt(localStorage.getItem("scorecard_count") || "0", 10); }
 
   function refreshHeader() {
@@ -483,20 +489,23 @@
   document.getElementById("changeEventBtn").addEventListener("click", () => {
     eventInput.value = getEvent() || "";
     raNameInput.value = getRAInput() || "";
+    pinInput.value = getPin() || "";
     eventModal.classList.remove("hidden");
   });
 
   document.getElementById("eventSaveBtn").addEventListener("click", () => {
     const ev = eventInput.value.trim();
     const ra = raNameInput.value.trim();
-    if (!ev || !ra) return;
+    const pin = pinInput.value.trim();
+    if (!ev || !ra || !pin) return;
     localStorage.setItem("scorecard_event", ev);
     localStorage.setItem("scorecard_ra_input", ra);
+    localStorage.setItem("scorecard_pin", pin);
     eventModal.classList.add("hidden");
     refreshHeader();
   });
 
-  if (!getEvent() || !getRAInput()) {
+  if (!getEvent() || !getRAInput() || !getPin()) {
     eventModal.classList.remove("hidden");
   } else {
     eventModal.classList.add("hidden");
@@ -572,7 +581,7 @@
   submitBtn.addEventListener("click", async () => {
     statusMsg.textContent = "";
 
-    if (!getEvent() || !getRAInput()) {
+    if (!getEvent() || !getRAInput() || !getPin()) {
       eventModal.classList.remove("hidden");
       return;
     }
@@ -600,7 +609,7 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${SUBMIT_SECRET}`
+          "Authorization": `Bearer ${getPin()}`
         },
         body: JSON.stringify(payload)
       });
