@@ -382,8 +382,12 @@
 
 <script>
   // ---- CONFIG ----
-  // TODO: replace with the deployed Worker endpoint once /scorecard/submit exists
   const SUBMIT_ENDPOINT = "https://scorecard-submit.bthall3.workers.dev/submit";
+  // Shared secret so only this page's requests are accepted -- not a login,
+  // just a filter against opportunistic/remote abuse of the endpoint by
+  // people who never touch an event iPad. Must match SCORECARD_SHARED_SECRET
+  // set on the scorecard-submit Worker.
+  const SUBMIT_SECRET = "Km7WiYPBFz9EwVMDDFjlte0cbY0FcRkrtSbaMpyYKM0";
 
   const TRAITS = [
     ["attractive", "Physically attractive"],
@@ -594,7 +598,10 @@
     try {
       const res = await fetch(SUBMIT_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUBMIT_SECRET}`
+        },
         body: JSON.stringify(payload)
       });
 

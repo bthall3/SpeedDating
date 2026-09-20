@@ -232,7 +232,12 @@ button.primary:disabled {
 </div>
 
 <script>
-  const WORKER_URL = "https://checkin.bthall3.workers.dev"; // update to your actual deployed Worker URL
+  const WORKER_URL = "https://checkin.bthall3.workers.dev";
+  // Shared secret so only this page's requests are accepted -- not a login,
+  // just a filter against opportunistic/remote abuse of the endpoint by
+  // people who never touch an event iPad. Must match CHECKIN_SHARED_SECRET
+  // set on the checkin Worker.
+  const CHECKIN_SECRET = "vOlvCa1QJoXJYnGKNUG99Uza--uK42a-gB-HkoS00sU";
 
   const items = [
     { key: "state_nervous", label: "Nervous" },
@@ -293,7 +298,10 @@ button.primary:disabled {
     try {
       const res = await fetch(`${WORKER_URL}/check-in`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${CHECKIN_SECRET}`
+        },
         body: JSON.stringify({
           email: emailInput.value.trim(),
           ...responses
