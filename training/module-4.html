@@ -345,7 +345,15 @@ function attachDotHandlers(figures, onProgress) {
       popover.classList.toggle("open");
       // Keep the popover inside the viewport (it is wider than a card on phones).
       popover.style.transform = "";
+      popover.style.width = "";
       if (popover.classList.contains("open")) {
+        // Left-opening tips shrink to fit the room left of the dot, so they
+        // stay on the left instead of being pushed back over it.
+        if (popover.classList.contains("dir-left")) {
+          const d = dot.getBoundingClientRect();
+          const room = d.left + d.width / 2 - 12;
+          if (room >= 120 && room < popover.offsetWidth) popover.style.width = room + "px";
+        }
         const r = popover.getBoundingClientRect();
         const vw = document.documentElement.clientWidth;
         const margin = 12;
