@@ -192,6 +192,14 @@ video {
   color: var(--crimson-soft);
 }
 .watched-flag.done { color: var(--crimson); }
+.video-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
 .video-block + .video-block { margin-top: 14px; }
 .transcript {
   margin-top: 14px;
@@ -579,6 +587,7 @@ function renderStep5() {
 </p>
 
     <div class="video-block">
+      <div class="video-label">Making a Shared Observation</div>
       <!-- TODO: replace microculture-video.mp4 with the real recorded video,
            placed in the same training/ folder as this page. -->
       <video id="microVideo1" controls playsinline>
@@ -596,6 +605,7 @@ function renderStep5() {
     </div>
 
     <div class="video-block">
+      <div class="video-label">Discovering a Shared Interest</div>
       <!-- TODO: add the second microculture video as microculture-video-2.mp4
            in the same training/ folder as this page. -->
       <video id="microVideo2" controls playsinline>
