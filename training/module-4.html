@@ -47,14 +47,26 @@ h1 {
 
 /* Dot-hotspot image cards */
 .figure-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  flex-wrap: wrap;
   margin: 16px 0;
 }
+/* A lone last card keeps the same width as the others, centered. */
+.figure-row > .figure-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  width: calc(50% - 8px);
+  justify-self: center;
+}
+@media (min-width: 540px) {
+  .figure-row.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .figure-row.cols-3 > .figure-card:last-child:nth-child(odd) {
+    grid-column: auto;
+    width: auto;
+    justify-self: stretch;
+  }
+}
 .figure-card {
-  flex: 1;
-  min-width: 150px;
   background: var(--bg-card);
   border: 1.5px solid var(--line);
   border-radius: var(--radius);
@@ -112,7 +124,7 @@ h1 {
   display: none;
   box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
-.tip-popover.open { display: block; }
+.tip-popover.open { display: block; pointer-events: none; } /* taps pass through to dots underneath */
 
 .dots-progress {
   font-size: 12.5px;
@@ -264,19 +276,23 @@ const EFFECTIVE_FIGURES = [
 
 const INEFFECTIVE_FIGURES = [
   {
-    id: "ineff1", img: "ineffective-1.jpg", svg: "bored", caption: "Expression",
-    dots: [ { pos: [50, 30], tip: "Try not to look bored with your date." } ]
+    id: "ineff1", img: "ineffective-1.jpg", svg: "onPhone", caption: "Attention",
+    dots: [ { pos: [63, 58], tip: "Avoid checking your phone, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
   },
   {
-    id: "ineff2", img: "ineffective-2.jpg", svg: "onPhone", caption: "Attention",
-    dots: [ { pos: [65, 45], tip: "Avoid checking your phone or looking around the room, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
+    id: "ineff2", img: "ineffective-2.jpg", svg: "closedPosture", caption: "Posture",
+    dots: [ { pos: [42, 62], tip: "Leaning away from your date or turning your legs to the side can suggest you want to leave the conversation or don't want to get close to your date." } ]
   },
   {
-    id: "ineff3", img: "ineffective-3.jpg", svg: "closedPosture", caption: "Posture",
+    id: "ineff3", img: "ineffective-3.jpg", svg: "bored", caption: "Expression and posture",
     dots: [
-      { pos: [50, 42], tip: "Crossed arms can make you seem closed-off or defensive." },
-      { pos: [30, 70], tip: "Leaning away from your date or turning your legs to the side can suggest you want to leave the conversation or don't want to get close to your date." }
+      { pos: [82, 30], tip: "Try not to look bored with your date." },
+      { pos: [50, 80], tip: "Crossed arms can make you seem closed-off or defensive." }
     ]
+  },
+  {
+    id: "ineff4", img: "ineffective-4.jpg", svg: "onPhone", caption: "Attention",
+    dots: [ { pos: [42, 26], tip: "Avoid looking around the room, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
   }
 ];
 
@@ -330,6 +346,17 @@ function attachDotHandlers(figures, onProgress) {
       });
 
       popover.classList.toggle("open");
+      // Keep the popover inside the viewport (it is wider than a card on phones).
+      popover.style.transform = "";
+      if (popover.classList.contains("open")) {
+        const r = popover.getBoundingClientRect();
+        const vw = document.documentElement.clientWidth;
+        const margin = 12;
+        let dx = 0;
+        if (r.right > vw - margin) dx = vw - margin - r.right;
+        if (r.left + dx < margin) dx = margin - r.left;
+        if (dx) popover.style.transform = `translateX(${dx}px)`;
+      }
       dot.classList.add("viewed");
       dotsViewedState[`${figId}-${dotIdx}`] = true;
       onProgress();
@@ -389,7 +416,7 @@ function renderStep2() {
     <div class="eyebrow">Module 4 - Nonverbal Behavior</div>
     <h1>Effective nonverbal behavior</h1>
     <p>Tap each dot below to read the tip.</p>
-    <div class="figure-row">
+    <div class="figure-row cols-${EFFECTIVE_FIGURES.length}">
       ${EFFECTIVE_FIGURES.map(renderFigureCard).join("")}
     </div>
     <div class="dots-progress" id="effectiveProgress"></div>
@@ -403,7 +430,7 @@ function renderStep3() {
     <div class="eyebrow">Module 4 - Nonverbal Behavior</div>
     <h1>Ineffective nonverbal behavior</h1>
     <p>Tap each dot below to read the tip.</p>
-    <div class="figure-row">
+    <div class="figure-row cols-${INEFFECTIVE_FIGURES.length}">
       ${INEFFECTIVE_FIGURES.map(renderFigureCard).join("")}
     </div>
     <div class="dots-progress" id="ineffectiveProgress"></div>
