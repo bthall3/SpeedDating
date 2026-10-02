@@ -192,6 +192,14 @@ video {
   color: var(--crimson-soft);
 }
 .watched-flag.done { color: var(--crimson); }
+.video-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--crimson);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
 .video-block + .video-block { margin-top: 14px; }
 .transcript {
   margin-top: 14px;
@@ -579,6 +587,7 @@ function renderStep5() {
 </p>
 
     <div class="video-block">
+      <div class="video-label">Making a Shared Observation</div>
       <!-- TODO: replace microculture-video.mp4 with the real recorded video,
            placed in the same training/ folder as this page. -->
       <video id="microVideo1" controls playsinline>
@@ -589,13 +598,18 @@ function renderStep5() {
       <details class="transcript" open>
         <summary>Transcript</summary>
         <div class="transcript-body">
-          <!-- TODO: paste transcript for video 1, one <p> per paragraph. -->
-          <p>Transcript coming soon.</p>
+          <p><strong>Malcolm:</strong> Mm, first date in a classroom, kind of weird.</p>
+          <p><strong>Stella:</strong> I know, I feel like I’m like <em>in class</em> right now.</p>
+          <p><strong>Malcolm:</strong> Yeah, I hope I get a good grade. Hope I get an ‘A’!</p>
+          <p><strong>Stella:</strong> Well, I hope you do, too, because earlier today I got a ‘C’.</p>
+          <p><strong>Malcolm:</strong> Well, C’s get degrees.</p>
+          <p><strong>Stella:</strong> Heh, true!</p>
         </div>
       </details>
     </div>
 
     <div class="video-block">
+      <div class="video-label">Discovering a Shared Interest</div>
       <!-- TODO: add the second microculture video as microculture-video-2.mp4
            in the same training/ folder as this page. -->
       <video id="microVideo2" controls playsinline>
@@ -606,8 +620,15 @@ function renderStep5() {
       <details class="transcript" open>
         <summary>Transcript</summary>
         <div class="transcript-body">
-          <!-- TODO: paste transcript for video 2, one <p> per paragraph. -->
-          <p>Transcript coming soon.</p>
+          <p><strong>Malcolm:</strong> So, are you watching any interesting TV shows lately?</p>
+          <p><strong>Stella:</strong> Oh yeah, I’ve been watching this show called ‘Tires’.</p>
+          <p><strong>Malcolm:</strong> With Shane Gillis!</p>
+          <p><strong>Stella:</strong> Yeah!</p>
+          <p><strong>Malcolm:</strong> Yes, I love that!</p>
+          <p><strong>Stella:</strong> Yeah, you know how he hired his like cousin, and then they hired those like…</p>
+          <p><strong>Malcolm:</strong> Those… those girls and like…</p>
+          <p><strong>Stella:</strong> Yes! And the shipping container! [laughs]</p>
+          <p><strong>Malcolm:</strong> Yeah! [laughs]</p>
         </div>
       </details>
     </div>
