@@ -356,6 +356,12 @@ function attachDotHandlers(figures, onProgress) {
   });
 }
 
+// Tapping anywhere that isn't a dot closes the open tip.
+document.addEventListener("click", e => {
+  if (e.target.closest(".dot")) return;
+  document.querySelectorAll(".tip-popover.open").forEach(p => p.classList.remove("open"));
+});
+
 function setProgress() {
   document.getElementById("progressFill").style.width = `${(step / TOTAL_STEPS) * 100}%`;
 }
