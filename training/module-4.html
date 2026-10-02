@@ -116,6 +116,11 @@ h1 {
   display: none;
   box-shadow: 0 6px 18px rgba(0,0,0,0.2);
 }
+/* Opening direction (default is right/down from the dot). */
+.tip-popover.dir-left { transform: translateX(-100%); }
+.tip-popover.dir-down { margin-top: 44px; }
+/* On phones a tip is wider than its card, so drop left-opening tips below the face. */
+@media (max-width: 540px) { .tip-popover.dir-left { margin-top: 44px; } }
 .tip-popover.open { display: block; pointer-events: none; } /* taps pass through to dots underneath */
 
 .dots-progress {
@@ -246,15 +251,15 @@ const EFFECTIVE_FIGURES = [
     id: "eff1", img: "effective-1.jpg", svg: "faceSmile", caption: "Facial expression",
     dots: [
       { pos: [65, 30], tip: "Smiling can make you seem happy and friendly." },
-      { pos: [20, 19], tip: "Maintaining eye contact when talking with your date makes you seem focused on the conversation." },
+      { pos: [20, 19], open: "left", tip: "Maintaining eye contact when talking with your date makes you seem focused on the conversation." },
       { pos: [72, 46], tip: "Leaning slightly forward toward your date can reduce psychological and physical distance, creating closeness." }
     ]
   },
   {
     id: "eff2", img: "effective-2.jpg", svg: "postureOpen", caption: "Posture",
     dots: [
-      { pos: [68, 82], tip: "Maintaining open body language (e.g., arms uncrossed) can make your date more comfortable." },
-      { pos: [80, 20], tip: "Nodding every so often while your date is talking signals that you're listening." }
+      { pos: [50, 52], tip: "Maintaining open body language (e.g., arms uncrossed) can make your date more comfortable." },
+      { pos: [80, 20], open: "down", tip: "Nodding every so often while your date is talking signals that you're listening." }
     ]
   },
   {
@@ -269,7 +274,7 @@ const EFFECTIVE_FIGURES = [
 const INEFFECTIVE_FIGURES = [
   {
     id: "ineff1", img: "ineffective-1.jpg", svg: "onPhone", caption: "Attention",
-    dots: [ { pos: [63, 58], tip: "Avoid checking your phone, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
+    dots: [ { pos: [63, 58], open: "left", tip: "Avoid checking your phone, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
   },
   {
     id: "ineff2", img: "ineffective-2.jpg", svg: "closedPosture", caption: "Posture",
@@ -284,7 +289,7 @@ const INEFFECTIVE_FIGURES = [
   },
   {
     id: "ineff4", img: "ineffective-4.jpg", svg: "onPhone", caption: "Attention",
-    dots: [ { pos: [42, 26], tip: "Avoid looking around the room, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
+    dots: [ { pos: [42, 26], open: "left", tip: "Avoid looking around the room, which suggests to your date that you aren’t interested in them or more interested in something else." } ]
   }
 ];
 
@@ -313,7 +318,7 @@ function renderFigureCard(fig) {
 
   const dots = fig.dots.map((d, i) => `
     <div class="dot" data-fig="${fig.id}" data-dot="${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">+</div>
-    <div class="tip-popover" id="tip-${fig.id}-${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">${d.tip}</div>
+    <div class="tip-popover dir-${d.open || "right"}" id="tip-${fig.id}-${i}" style="left:${d.pos[0]}%; top:${d.pos[1]}%;">${d.tip}</div>
   `).join("");
 
   return `
@@ -340,14 +345,25 @@ function attachDotHandlers(figures, onProgress) {
       popover.classList.toggle("open");
       // Keep the popover inside the viewport (it is wider than a card on phones).
       popover.style.transform = "";
+      popover.style.width = "";
       if (popover.classList.contains("open")) {
+        // Left-opening tips shrink to fit the room left of the dot, so they
+        // stay on the left instead of being pushed back over it.
+        if (popover.classList.contains("dir-left")) {
+          const d = dot.getBoundingClientRect();
+          const room = d.left + d.width / 2 - 12;
+          if (room >= 120 && room < popover.offsetWidth) popover.style.width = room + "px";
+        }
         const r = popover.getBoundingClientRect();
         const vw = document.documentElement.clientWidth;
         const margin = 12;
         let dx = 0;
         if (r.right > vw - margin) dx = vw - margin - r.right;
         if (r.left + dx < margin) dx = margin - r.left;
-        if (dx) popover.style.transform = `translateX(${dx}px)`;
+        if (dx) {
+          const base = popover.classList.contains("dir-left") ? "-100%" : "0px";
+          popover.style.transform = `translateX(calc(${base} + ${dx}px))`;
+        }
       }
       dot.classList.add("viewed");
       dotsViewedState[`${figId}-${dotIdx}`] = true;
