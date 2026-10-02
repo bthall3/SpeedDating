@@ -52,19 +52,11 @@ h1 {
   gap: 16px;
   margin: 16px 0;
 }
-/* A lone last card keeps the same width as the others, centered. */
+/* Two per row; a lone last card keeps the same width, centered below. */
 .figure-row > .figure-card:last-child:nth-child(odd) {
   grid-column: 1 / -1;
   width: calc(50% - 8px);
   justify-self: center;
-}
-@media (min-width: 540px) {
-  .figure-row.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .figure-row.cols-3 > .figure-card:last-child:nth-child(odd) {
-    grid-column: auto;
-    width: auto;
-    justify-self: stretch;
-  }
 }
 .figure-card {
   background: var(--bg-card);
@@ -416,7 +408,7 @@ function renderStep2() {
     <div class="eyebrow">Module 4 - Nonverbal Behavior</div>
     <h1>Effective nonverbal behavior</h1>
     <p>Tap each dot below to read the tip.</p>
-    <div class="figure-row cols-${EFFECTIVE_FIGURES.length}">
+    <div class="figure-row">
       ${EFFECTIVE_FIGURES.map(renderFigureCard).join("")}
     </div>
     <div class="dots-progress" id="effectiveProgress"></div>
@@ -430,7 +422,7 @@ function renderStep3() {
     <div class="eyebrow">Module 4 - Nonverbal Behavior</div>
     <h1>Ineffective nonverbal behavior</h1>
     <p>Tap each dot below to read the tip.</p>
-    <div class="figure-row cols-${INEFFECTIVE_FIGURES.length}">
+    <div class="figure-row">
       ${INEFFECTIVE_FIGURES.map(renderFigureCard).join("")}
     </div>
     <div class="dots-progress" id="ineffectiveProgress"></div>
