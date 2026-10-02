@@ -192,6 +192,28 @@ video {
   color: var(--crimson-soft);
 }
 .watched-flag.done { color: var(--crimson); }
+.video-block + .video-block { margin-top: 14px; }
+.transcript {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.transcript summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.transcript-body {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.transcript-body p { margin: 0 0 10px; }
 
 /* Rank-order check */
 .rank-item {
@@ -559,26 +581,56 @@ function renderStep5() {
     <div class="video-block">
       <!-- TODO: replace microculture-video.mp4 with the real recorded video,
            placed in the same training/ folder as this page. -->
-      <video id="microVideo" controls playsinline>
+      <video id="microVideo1" controls playsinline>
         <source src="microculture-video.mp4" type="video/mp4">
         Your browser doesn't support embedded video.
       </video>
-      <div class="watched-flag" id="microWatchedFlag">○ Watch to continue</div>
+      <div class="watched-flag" id="microWatchedFlag1">○ Watch to continue</div>
+      <details class="transcript" open>
+        <summary>Transcript</summary>
+        <div class="transcript-body">
+          <!-- TODO: paste transcript for video 1, one <p> per paragraph. -->
+          <p>Transcript coming soon.</p>
+        </div>
+      </details>
     </div>
 
-    <div class="gate-note" id="microGateNote">Watch the video above to continue.</div>
+    <div class="video-block">
+      <!-- TODO: add the second microculture video as microculture-video-2.mp4
+           in the same training/ folder as this page. -->
+      <video id="microVideo2" controls playsinline>
+        <source src="microculture-video-2.mp4" type="video/mp4">
+        Your browser doesn't support embedded video.
+      </video>
+      <div class="watched-flag" id="microWatchedFlag2">○ Watch to continue</div>
+      <details class="transcript" open>
+        <summary>Transcript</summary>
+        <div class="transcript-body">
+          <!-- TODO: paste transcript for video 2, one <p> per paragraph. -->
+          <p>Transcript coming soon.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="gate-note" id="microGateNote">Watch both videos above to continue.</div>
     <button class="btn" id="microContinueBtn" disabled onclick="goToStep(6)">Continue</button>
   `;
 }
 
 function attachVideoHandlers() {
-  const v = document.getElementById("microVideo");
-  v.addEventListener("ended", () => {
-    videoWatched = true;
-    document.getElementById("microWatchedFlag").textContent = "✓ Watched";
-    document.getElementById("microWatchedFlag").classList.add("done");
-    document.getElementById("microContinueBtn").disabled = false;
-    document.getElementById("microGateNote").textContent = "You're ready to continue.";
+  const watched = [false, false];
+  [1, 2].forEach(n => {
+    document.getElementById("microVideo" + n).addEventListener("ended", () => {
+      watched[n - 1] = true;
+      const flag = document.getElementById("microWatchedFlag" + n);
+      flag.textContent = "✓ Watched";
+      flag.classList.add("done");
+      if (watched.every(Boolean)) {
+        videoWatched = true;
+        document.getElementById("microContinueBtn").disabled = false;
+        document.getElementById("microGateNote").textContent = "You're ready to continue.";
+      }
+    });
   });
 }
 
