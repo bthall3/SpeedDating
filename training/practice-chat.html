@@ -132,6 +132,13 @@ h1 { font-size: 28px; line-height: 1.2; }
   cursor: pointer;
 }
 .send-btn:disabled { background: var(--line); cursor: not-allowed; }
+.chat-disclaimer {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  text-align: center;
+}
 
 /* Feedback screen */
 .feedback-loading {
@@ -279,6 +286,7 @@ function renderChat() {
       <textarea id="chatInput" placeholder="Type your message..." rows="1"></textarea>
       <button class="send-btn" id="sendBtn">&rarr;</button>
     </div>
+    <div class="chat-disclaimer">This conversation is with an AI chatbot, not a real person. You may stop chatting at any time by closing this tab. Do not share any identifying information beyond your first name.</div>
   `;
 }
 
