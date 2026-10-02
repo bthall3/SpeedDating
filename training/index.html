@@ -264,6 +264,30 @@
   display: block;
   margin-bottom: 20px;
 }
+.welcome-transcript {
+  text-align: left;
+  margin-bottom: 20px;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.welcome-transcript summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.welcome-transcript-body {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.welcome-transcript-body p { margin: 0 0 10px; }
+.welcome-box { max-height: 100%; overflow-y: auto; }
 .welcome-actions {
   display: flex;
   justify-content: center;
@@ -316,6 +340,12 @@
         <source src="welcome.mp4" type="video/mp4">
         Your browser doesn't support embedded video.
       </video>
+      <details class="welcome-transcript" open>
+        <summary>Transcript</summary>
+        <div class="welcome-transcript-body">
+          <p>Thank you for your participation in the University of Alabama Department of Psychology’s Speed-Dating Event and Study. I’m Braden Hall, the principal investigator of this study. The research team and I have worked hard to develop these learning modules to best prepare you for speed-dating success. The content included in these modules is based on decades of research on first impressions and dating success. Feel free to take your time going through the modules, take notes, and review previous sections. Also, this learning experience is not meant to suggest that you are lacking in any dating skills. Rather, it is meant to enhance your existing skills so that you can perform to the best of your ability with confidence.</p>
+        </div>
+      </details>
       <div class="welcome-actions">
         <button class="welcome-continue" id="welcomeContinueBtn">Continue to your training</button>
       </div>
