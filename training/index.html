@@ -385,6 +385,15 @@ const CONFIG = {
   demoMode: false   // live: pulling real data from /resolve-token
 };
 
+// first_name comes from free-text Qualtrics intake and is rendered via
+// innerHTML below -- escape it so a participant can't stash markup/script
+// in their name field and have it execute on their own dashboard load.
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 const MODULES = [
   { n: 1, title: "Getting Ready", desc: "Prepare for the event and calm your nerves.",href: "module-1.html",  condition: "all" },
   { n: 2, title: "Introducing Yourself", desc: "Make lasting positive first impressions.", href: "module-2.html",  condition: "all" },
@@ -480,7 +489,7 @@ function renderDashboard(token, data) {
 
   app.innerHTML = `
     <section class="hero">
-     ${data.first_name ? `<div class="hero-eyebrow">Hi, ${data.first_name}</div>` : ""}
+     ${data.first_name ? `<div class="hero-eyebrow">Hi, ${escapeHtml(data.first_name)}</div>` : ""}
 
   <h1 class="hero-h1">Welcome to <em class="datesharp-name">DateSHARP</em></h1>
   <p class="hero-sub">These modules will help you develop <span class="sharp-letter">skills</span> for <span class="sharp-letter">handling</span> your <span class="sharp-letter">approach</span>, <span class="sharp-letter">rapport</span> building, and self-<span class="sharp-letter">presentation</span> during your speed-dating event. Work through each module in order. Your progress is saved automatically once you complete a module, so you can leave and come back and pick up where you left off. However, if you leave in the middle of a module, you will have to restart that module when you return.</p>
