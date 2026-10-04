@@ -85,6 +85,17 @@
   transition: width 0.5s ease;
 }
 
+/* Bug-report link */
+.bug-report {
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.bug-report a { color: var(--crimson); font-weight: 600; text-decoration: underline; }
+
 /* Module path */
 .path { position: relative; }
 .path::before {
@@ -331,10 +342,6 @@
     <div class="welcome-box">
       <div class="welcome-eyebrow">Welcome</div>
       <h2 class="welcome-h2">Please watch the welcome video before getting started</h2>
-      <!-- TODO: replace welcome.mp4 with the real recorded video, placed in
-           the same training/ folder as this file. Keep it under GitHub's
-           100MB per-file cap — compress with HandBrake (H.264, modest
-           bitrate or 720p) if the raw recording is larger. -->
       <video class="welcome-video" id="welcomeVideo" controls playsinline>
         <source src="welcome.mp4" type="video/mp4">
         Your browser doesn't support embedded video.
@@ -353,14 +360,16 @@
   <div id="app">
     <div class="loading">Loading your training...</div>
   </div>
+  <p class="bug-report">
+    Something not working? <a href="mailto:bthall3@crimson.ua.edu?subject=DateSHARP%20training%20bug%20report&amp;body=What%20happened%3F%0A%0A%0AWhich%20module%20or%20page%20were%20you%20on%3F%0A%0A%0AWhat%20device%20and%20browser%20are%20you%20using%3F%0A">Email us about a bug</a>
+  </p>
 </div>
 
 <script>
 /* =========================================================================
-   CONFIG — connect this to the real Worker once /resolve-token exists.
-   Nothing here is guessed at beyond "the endpoint returns JSON shaped like
-   this." Rename keys on the right to match real REDCap field names, not
-   the other way around.
+   CONFIG — /resolve-token is live (see demoMode below). The endpoint returns
+   JSON shaped like this. Rename keys on the right to match real REDCap
+   field names, not the other way around.
 
    EXPECTED RESPONSE from GET {endpoint}?t=<token>:
    {

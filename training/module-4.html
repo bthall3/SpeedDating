@@ -171,7 +171,7 @@ h1 {
    CONFIG
    ========================================================================= */
 const CONFIG = {
-  submitEndpoint: "https://module4-submit.bthall3.workers.dev", // TODO: confirm once deployed
+  submitEndpoint: "https://module4-submit.bthall3.workers.dev",
   returnUrl: "./"
 };
 
@@ -190,20 +190,10 @@ let step = 1;
 const TOTAL_STEPS = 4;
 
 /* =========================================================================
-   FIGURES — simple original line-art illustrations, not photos.
-
-   TO SWAP IN REAL PHOTOS LATER:
-   1. Upload the photo files (e.g. effective-1.jpg) into training/ on GitHub,
-      alongside this file.
-   2. In each figure object below, replace the `svg: "faceSmile"` line with
-      `img: "effective-1.jpg"` (matching whatever filename you uploaded).
-   3. In renderFigureCard(), the code already checks for `fig.img` first and
-      will render an <img> tag instead of the inline SVG automatically —
-      no other code changes needed.
-   4. Reposition each dot's `pos: [x, y]` (percentage across/down the image)
-      to match where that tip's subject actually appears in the real photo.
-      This step matters most — the illustration's proportions won't match
-      a real photo, so dots will likely need to move.
+   FIGURES — each figure uses its photo (`img`, files in this folder) and
+   falls back to the inline SVG illustration (`svg`) if the photo is
+   missing. Each dot's `pos: [x, y]` is a percentage across/down the image
+   and must be repositioned if a photo is replaced.
    ========================================================================= */
 const FIGURE_SVGS = {
   faceSmile: `<svg viewBox="0 0 200 260" xmlns="http://www.w3.org/2000/svg">
