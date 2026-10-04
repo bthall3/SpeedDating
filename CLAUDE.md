@@ -12,9 +12,9 @@ Static site for the University of Alabama Department of Psychology Speed Dating 
 - `checkin/index.html` — participant event check-in form.
 - `scorecard.html` — RA-facing (research assistant) iPad data-entry tool used *during* speed-dating events to record per-date ratings. Deliberately landscape-only, black-and-white, Georgia serif to mirror the physical paper scorecard it replaces (see the comment at the top of its `<style>` block).
 - `match-admin.html` — internal admin tool (noindex) that triggers match computation/emailing for an event and can download a CSV summary. Not participant-facing.
-- `training/index.html` — token-based dashboard entry point for a multi-module RA training curriculum (`?token=...` resolved server-side; has a `demoMode` fallback).
-- `training/module-1.html` through `module-7.html` — individual training modules.
-- `training/practice-chat.html` — simulated practice conversation exercise, part of training.
+- `training/index.html` — token-based dashboard entry point for the participant-facing DateSHARP pre-event training (`?token=...` resolved server-side by `resolve-token`; `demoMode` is off). Participants are assigned a condition at sign-up (`control` gets no modules, `review` gets modules 1-6, `practice` gets modules 1-7 plus the practice chatbot).
+- `training/module-1.html` through `module-7.html` — individual DateSHARP training modules.
+- `training/practice-chat.html` — simulated 4-minute practice conversation with an AI persona, part of module 7 for the `practice` condition.
 
 ## Architecture: pages call Cloudflare Workers
 
@@ -26,7 +26,7 @@ Every page that needs a backend (submission, check-in, match computation, token 
 - `training/index.html` → `resolve-token.bthall3.workers.dev/resolve-token` (`GET ?t=<token>`)
 - `training/module-*.html`, `practice-chat.html` → per-module `submitEndpoint`/`saveEndpoint`/`chatEndpoint`/`feedbackEndpoint`/`logEndpoint`
 
-**None of these Workers live in this repo.** When a page's inline comment says `// TODO: confirm once deployed`, the Worker may not exist yet or its URL may be a placeholder — don't assume the endpoint is live. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
+**None of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
 
 ## Styling conventions
 
