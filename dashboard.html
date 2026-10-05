@@ -145,7 +145,7 @@
 
   function render(d) {
     $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
-    renderHealth(d.health, d.errors && d.errors.health);
+    renderHealth(d.health, d.errors && d.errors.health, d.usage, d.errors && d.errors.usage);
     renderEvents(d.stats, d.errors && d.errors.stats);
     renderTraining(d.stats);
     renderQuality(d.stats);
@@ -154,7 +154,7 @@
   /* ------------------------------------------------------------- health */
   const ICON = { up: "✓ Up", degraded: "! Degraded", down: "✗ Down", unknown: "? Unknown" };
 
-  function renderHealth(h, err) {
+  function renderHealth(h, err, usage, usageErr) {
     const root = $("health"); root.replaceChildren();
     if (!h) { root.append(el("div", { class: "err", text: "Health checks failed: " + (err || "unknown error") })); return; }
     const s = h.summary, total = h.workers.length;
@@ -167,13 +167,23 @@
     for (const [name, ws] of Object.entries(groups)) {
       const card = el("div", { class: "card" }, el("p", { class: "group-title", text: name }));
       for (const w of ws) {
+        const u = usage && usage.by_worker[w.id];
         card.append(el("div", { class: "row" }, el("span", { text: w.id }),
           el("span", { class: "st " + w.status, text: ICON[w.status] + (w.ms != null && w.status === "up" ? ` · ${w.ms} ms` : "") })));
+        if (usage) card.append(el("div", { class: "detail", text: u ? `${u.success} ran OK · ${u.errors} errored · last ${usage.window_minutes} min` : `0 requests · last ${usage.window_minutes} min` }));
         if (w.detail) card.append(el("div", { class: "detail", text: w.detail }));
       }
       grid.append(card);
     }
     root.append(grid, el("p", { class: "muted", text: h.scope }));
+    if (usage) {
+      const tot = Object.values(usage.by_worker).reduce((a, u) => ({ r: a.r + u.requests, e: a.e + u.errors }), { r: 0, e: 0 });
+      root.append(el("p", { class: "muted", text: `Requests (last ${usage.window_minutes} min, account-wide): ${tot.r} total, ${tot.e} errored. "Ran OK" means the Worker executed without crashing — NOT that it returned HTTP 2xx (a deliberate 400/401/404 counts as OK). Includes this dashboard's own probes (about 1 per Worker per refresh); lags real time by a few minutes.` }));
+    } else if (usageErr === "not_configured") {
+      root.append(el("p", { class: "muted", text: "Request counts are off: set CF_ACCOUNT_ID and the CF_ANALYTICS_TOKEN secret on the dashboard-stats Worker (see its README)." }));
+    } else if (usageErr) {
+      root.append(el("p", { class: "err", text: "Request counts unavailable: " + usageErr }));
+    }
   }
 
   /* ------------------------------------------------------------- events */

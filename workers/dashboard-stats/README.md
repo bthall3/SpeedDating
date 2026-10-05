@@ -16,6 +16,18 @@ npx wrangler deploy
 Then confirm `WORKER_URL` in `dashboard.html` matches the deployed URL.
 `wrangler deploy` fails if any service named in `wrangler.toml` doesn't exist in the account.
 
+## Optional: request counts per Worker (last 60 min)
+
+1. Cloudflare dashboard → My Profile → API Tokens → Create Token → Custom token, permission
+   **Account › Account Analytics › Read** (nothing else), scoped to your account.
+2. `npx wrangler secret put CF_ANALYTICS_TOKEN` and paste it.
+3. Uncomment `CF_ACCOUNT_ID` in `wrangler.toml` and paste your account ID (dashboard sidebar, or the
+   32-hex-character string in any dash.cloudflare.com URL), then `npx wrangler deploy`.
+
+Source: GraphQL `workersInvocationsAdaptive` (`sum { requests errors }`). "Ran OK" = requests − errors, i.e.
+the Worker executed without throwing or exceeding limits — **not** an HTTP 2xx. The dashboard's own probes are
+included, and data lags a few minutes. Without the token the rest of the dashboard works normally.
+
 ## What the health probes do (and don't) prove
 
 All probes are write-free. "Up" means: deployed, reachable, and — for the module / practice

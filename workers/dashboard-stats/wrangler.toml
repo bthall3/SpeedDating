@@ -4,10 +4,14 @@ compatibility_date = "2026-09-01"
 
 [vars]
 REDCAP_API_URL = "https://redcap.as.ua.edu/api/"
+# Optional (request counts): your 32-character Cloudflare account ID.
+# CF_ACCOUNT_ID = "paste-account-id-here"
 
 # Secrets (set with `npx wrangler secret put <NAME>`, never committed):
 #   REDCAP_API_TOKEN   -- use a READ-ONLY REDCap API token (export rights only)
 #   DASHBOARD_SECRET   -- long random string; typed into dashboard.html
+#   CF_ANALYTICS_TOKEN -- optional; Cloudflare API token with ONLY
+#                         "Account > Account Analytics > Read" (request counts)
 
 # One binding per probed Worker (workers.dev -> workers.dev fetches are blocked).
 [[services]]

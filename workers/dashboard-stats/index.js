@@ -183,6 +183,67 @@ function wantedBaseFields() {
   return f;
 }
 
+/* ------------------------------------------------------------------ usage
+   Request counts per Worker from Cloudflare's GraphQL Analytics API
+   (workersInvocationsAdaptive). Needs CF_ACCOUNT_ID (var) and
+   CF_ANALYTICS_TOKEN (secret, "Account > Account Analytics > Read").
+
+   "success" = requests - errors, per Cloudflare's own definition: the Worker
+   RAN without throwing/exceeding limits. It is NOT an HTTP 2xx -- a Worker
+   that deliberately returns 400/401/404 still counts as a success here.
+   Counts include this dashboard's own probes (~1 per Worker per refresh)
+   and lag real time by a few minutes.                                       */
+
+const USAGE_WINDOW_MIN = 60;
+const USAGE_CACHE_MS = 60000;
+const USAGE_QUERY = `
+query WorkerUsage($accountTag: string!, $start: Time!, $end: Time!) {
+  viewer {
+    accounts(filter: { accountTag: $accountTag }) {
+      workersInvocationsAdaptive(limit: 1000, filter: { datetime_geq: $start, datetime_leq: $end }) {
+        dimensions { scriptName }
+        sum { requests errors }
+      }
+    }
+  }
+}`;
+
+let usageCache = { at: 0, data: null };
+async function getUsage(env) {
+  if (!env.CF_ACCOUNT_ID || !env.CF_ANALYTICS_TOKEN) throw new Error("not_configured");
+  if (usageCache.data && Date.now() - usageCache.at < USAGE_CACHE_MS) return usageCache.data;
+
+  const end = new Date();
+  const start = new Date(end.getTime() - USAGE_WINDOW_MIN * 60000);
+  const res = await withTimeout(fetch("https://api.cloudflare.com/client/v4/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.CF_ANALYTICS_TOKEN}` },
+    body: JSON.stringify({ query: USAGE_QUERY, variables: { accountTag: env.CF_ACCOUNT_ID, start: start.toISOString(), end: end.toISOString() } })
+  }), 15000);
+  if (!res.ok) throw new Error(`analytics_http_${res.status}`);
+  const payload = await res.json();
+  if (payload.errors && payload.errors.length) throw new Error("analytics_query_error");
+  const rows = payload.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive;
+  if (!Array.isArray(rows)) throw new Error("analytics_bad_shape");
+
+  const byWorker = {};
+  for (const r of rows) {
+    const name = r.dimensions && r.dimensions.scriptName;
+    if (!name) continue;
+    const slot = byWorker[name] || (byWorker[name] = { requests: 0, errors: 0, success: 0 });
+    slot.requests += r.sum.requests || 0;
+    slot.errors += r.sum.errors || 0;
+    slot.success = slot.requests - slot.errors;
+  }
+  usageCache = { at: Date.now(), data: {
+    window_minutes: USAGE_WINDOW_MIN,
+    from: start.toISOString(),
+    to: end.toISOString(),
+    by_worker: byWorker
+  } };
+  return usageCache.data;
+}
+
 /* ------------------------------------------------------------------ stats */
 
 function todayInTz() {
@@ -347,13 +408,16 @@ export default {
     if (url.pathname !== "/snapshot") return json({ error: "not_found" }, 404, origin);
 
     // Sections fail independently so a REDCap outage still shows Worker health.
-    const [health, stats] = await Promise.allSettled([getHealth(env), getStats(env)]);
+    const [health, stats, usage] = await Promise.allSettled([getHealth(env), getStats(env), getUsage(env)]);
     return json({
       health: health.status === "fulfilled" ? health.value : null,
       stats: stats.status === "fulfilled" ? stats.value : null,
+      usage: usage.status === "fulfilled" ? usage.value : null,
       errors: {
         health: health.status === "rejected" ? "health_check_failed" : null,
-        stats: stats.status === "rejected" ? "redcap_stats_failed" : null
+        stats: stats.status === "rejected" ? "redcap_stats_failed" : null,
+        // Error codes only (no upstream text), e.g. not_configured, analytics_http_403.
+        usage: usage.status === "rejected" ? usage.reason.message : null
       }
     }, 200, origin);
   }
