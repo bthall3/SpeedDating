@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Researcher Dashboard — Speed Dating Study</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  /* Internal researcher tool: self-contained palette, like match-admin.html. */
+  :root {
+    --crimson: #9E1B32;
+    --ink: #24211f;
+    --muted: #6b6259;
+    --paper: #faf7f2;
+    --card: #ffffff;
+    --line: #e6ddd2;
+    --soft: #f5f0e8;
+    --ok: #1b6e3c;
+    --warn: #8a5a00;
+    --bad: #9E1B32;
+    --bar: #5b6f8f;
+    --bar-partial: #c9d3e3;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); margin: 0; padding: 1.5rem 1rem 4rem; }
+  main { max-width: 1100px; margin: 0 auto; }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-size: 1.5rem; color: var(--crimson); margin: 0; }
+  h2 { font-size: 1.05rem; margin: 2rem 0 0.6rem; }
+  h3 { font-size: 0.95rem; margin: 0 0 0.5rem; }
+  .muted { color: var(--muted); font-size: 0.85rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem 1.2rem; }
+  .grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .topbar { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .topbar .actions { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+  button { padding: 0.5rem 0.9rem; background: var(--crimson); color: #fff; border: 0; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--crimson); border: 1px solid var(--crimson); }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  input[type=password] { padding: 0.6rem 0.7rem; border: 1px solid #d9cfc2; border-radius: 8px; font-size: 1rem; width: 100%; margin: 0.4rem 0 0.9rem; }
+  #login { max-width: 380px; margin: 4rem auto; }
+  .hidden { display: none; }
+
+  .banner { border-radius: 10px; padding: 0.7rem 1rem; font-weight: 600; border: 1px solid; }
+  .banner.ok { color: var(--ok); border-color: var(--ok); background: #eef7f1; }
+  .banner.warn { color: var(--warn); border-color: var(--warn); background: #fff6e5; }
+  .banner.bad { color: var(--bad); border-color: var(--bad); background: #fdeef0; }
+
+  .group-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0 0 0.4rem; }
+  .row { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.25rem 0; border-top: 1px solid var(--soft); font-size: 0.88rem; }
+  .row:first-of-type { border-top: 0; }
+  .st { font-weight: 600; white-space: nowrap; }
+  .st.up { color: var(--ok); } .st.degraded { color: var(--warn); } .st.down { color: var(--bad); } .st.unknown { color: var(--muted); }
+  .detail { font-size: 0.78rem; color: var(--muted); padding-bottom: 0.3rem; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 0.5rem 0 0.8rem; }
+  .kpi .n { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+  .kpi .l { font-size: 0.75rem; color: var(--muted); }
+  table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+  th, td { text-align: left; padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--soft); }
+  th { font-weight: 600; color: var(--muted); font-size: 0.75rem; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+  .badge.warn { color: var(--warn); border-color: var(--warn); background: #fff6e5; }
+  .badge.ok { color: var(--ok); border-color: var(--ok); background: #eef7f1; }
+
+  .bars { display: grid; grid-template-columns: 4.5rem 1fr 7rem; gap: 0.3rem 0.6rem; align-items: center; font-size: 0.82rem; }
+  .track { background: var(--soft); border-radius: 4px; height: 12px; overflow: hidden; display: flex; }
+  .fill { background: var(--bar); height: 100%; }
+  .fill.partial { background: var(--bar-partial); }
+  ul.flags { margin: 0.3rem 0 0 1.1rem; padding: 0; font-size: 0.88rem; }
+  .err { color: var(--bad); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <div id="login" class="card">
+    <h1>Researcher Dashboard</h1>
+    <p class="muted">Enter the dashboard password. It is kept only for this browser tab.</p>
+    <input type="password" id="secret" autocomplete="off" aria-label="Dashboard password" />
+    <button id="loginBtn" style="width:100%">Sign in</button>
+    <p id="loginErr" class="err"></p>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1>Researcher Dashboard</h1>
+        <div class="muted" id="updated">Loading…</div>
+      </div>
+      <div class="actions">
+        <label class="muted"><input type="checkbox" id="auto" /> Auto-refresh (60 s)</label>
+        <button id="refreshBtn">Refresh</button>
+        <button id="logoutBtn" class="secondary">Sign out</button>
+      </div>
+    </div>
+    <div id="fatal" class="err"></div>
+
+    <h2>Worker health</h2>
+    <div id="health"></div>
+
+    <h2>Events</h2>
+    <div id="events"></div>
+
+    <h2>Training progress</h2>
+    <div id="training"></div>
+
+    <h2>Data quality</h2>
+    <div id="quality"></div>
+  </div>
+</main>
+
+<script>
+  // Deployed from workers/dashboard-stats. Update if your subdomain differs.
+  const WORKER_URL = "https://dashboard-stats.bthall3.workers.dev/snapshot";
+  const SS_KEY = "dashboard_secret"; // sessionStorage: cleared when the tab closes
+
+  const $ = id => document.getElementById(id);
+  let timer = null;
+
+  function el(tag, props, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else n.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid != null) n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+    return n;
+  }
+  const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+  const getSecret = () => { try { return sessionStorage.getItem(SS_KEY) || ""; } catch { return ""; } };
+  const setSecret = v => { try { v ? sessionStorage.setItem(SS_KEY, v) : sessionStorage.removeItem(SS_KEY); } catch {} };
+
+  async function load() {
+    $("refreshBtn").disabled = true;
+    $("fatal").textContent = "";
+    try {
+      const res = await fetch(WORKER_URL, { headers: { Authorization: "Bearer " + getSecret() } });
+      if (res.status === 401) { signOut("Wrong password."); return; }
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      render(await res.json());
+    } catch (err) {
+      $("fatal").textContent = "Could not reach the dashboard Worker (" + err.message + "). Is dashboard-stats deployed?";
+    } finally {
+      $("refreshBtn").disabled = false;
+    }
+  }
+
+  function render(d) {
+    $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
+    renderHealth(d.health, d.errors && d.errors.health);
+    renderEvents(d.stats, d.errors && d.errors.stats);
+    renderTraining(d.stats);
+    renderQuality(d.stats);
+  }
+
+  /* ------------------------------------------------------------- health */
+  const ICON = { up: "✓ Up", degraded: "! Degraded", down: "✗ Down", unknown: "? Unknown" };
+
+  function renderHealth(h, err) {
+    const root = $("health"); root.replaceChildren();
+    if (!h) { root.append(el("div", { class: "err", text: "Health checks failed: " + (err || "unknown error") })); return; }
+    const s = h.summary, total = h.workers.length;
+    const cls = s.down ? "bad" : s.degraded || s.unknown ? "warn" : "ok";
+    root.append(el("div", { class: "banner " + cls, text: `${s.up} of ${total} healthy` + (s.degraded ? ` · ${s.degraded} degraded` : "") + (s.down ? ` · ${s.down} down` : "") + (s.unknown ? ` · ${s.unknown} unknown` : "") }));
+
+    const groups = {};
+    for (const w of h.workers) (groups[w.group] = groups[w.group] || []).push(w);
+    const grid = el("div", { class: "grid", style: "margin-top:0.8rem" });
+    for (const [name, ws] of Object.entries(groups)) {
+      const card = el("div", { class: "card" }, el("p", { class: "group-title", text: name }));
+      for (const w of ws) {
+        card.append(el("div", { class: "row" }, el("span", { text: w.id }),
+          el("span", { class: "st " + w.status, text: ICON[w.status] + (w.ms != null && w.status === "up" ? ` · ${w.ms} ms` : "") })));
+        if (w.detail) card.append(el("div", { class: "detail", text: w.detail }));
+      }
+      grid.append(card);
+    }
+    root.append(grid, el("p", { class: "muted", text: h.scope }));
+  }
+
+  /* ------------------------------------------------------------- events */
+  function whenText(e) {
+    if (!e.event_date) return "date not set";
+    const d = e.days_until;
+    if (d === null) return e.event_date;
+    return `${e.event_date} · ` + (d > 0 ? `in ${d} day${d === 1 ? "" : "s"}` : d === 0 ? "today" : `${-d} day${d === -1 ? "" : "s"} ago`);
+  }
+
+  function renderEvents(s, err) {
+    const root = $("events"); root.replaceChildren();
+    if (!s) { root.append(el("div", { class: "err", text: "Could not load REDCap data: " + (err || "unknown error") })); return; }
+    if (!s.events.length) { root.append(el("p", { class: "muted", text: "No records with an event number yet." })); return; }
+
+    const grid = el("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(330px,1fr))" });
+    for (const e of s.events) {
+      const sx = e.by_sex;
+      const card = el("div", { class: "card" },
+        el("h3", { text: "Event " + e.event }),
+        el("div", { class: "muted", text: whenText(e) }),
+        el("div", { class: "kpis" },
+          kpi(e.signed_up, "signed up"),
+          kpi(e.checked_in.total, "checked in"),
+          kpi(e.scorecards.rows, "scorecards"),
+          kpi(e.matches_processed, "match-processed")),
+        el("div", { class: "muted", text: `Signed up: ${sx.M} M · ${sx.F} F` + (sx.other ? ` · ${sx.other} unknown sex` : "") + ` — checked in: ${e.checked_in.M} M · ${e.checked_in.F} F` }),
+        e.at_risk ? el("p", {}, el("span", { class: "badge warn", text: `${e.at_risk} not ready: training incomplete, event ≤ 3 days away, not checked in` })) : null,
+        condTable(e));
+      grid.append(card);
+    }
+    root.append(grid);
+    if (!s.scorecard_tracking) root.append(el("p", { class: "muted", text: "Scorecard counts unavailable: no `event` field found in the REDCap dictionary." }));
+  }
+
+  function kpi(n, label) { return el("div", { class: "kpi" }, el("div", { class: "n", text: n }), el("div", { class: "l", text: label })); }
+
+  function condTable(e) {
+    const t = el("table", {}, el("tr", {}, el("th", { text: "Condition" }), el("th", { class: "num", text: "M" }), el("th", { class: "num", text: "F" }), el("th", { class: "num", text: "Total" })));
+    for (const c of ["control", "review", "practice", "unassigned"]) {
+      if (c === "unassigned" && !e.by_condition.unassigned) continue;
+      t.append(el("tr", {}, el("td", { text: c }), el("td", { class: "num", text: e.condition_by_sex.M[c] }), el("td", { class: "num", text: e.condition_by_sex.F[c] }), el("td", { class: "num", text: e.by_condition[c] })));
+    }
+    return t;
+  }
+
+  /* ----------------------------------------------------------- training */
+  function renderTraining(s) {
+    const root = $("training"); root.replaceChildren();
+    if (!s) return;
+    const events = s.events.filter(e => Object.values(e.training).some(t => t.n));
+    if (!events.length) { root.append(el("p", { class: "muted", text: "No review/practice participants yet." })); return; }
+    root.append(el("p", { class: "muted", text: "Dark bar = completed; light bar = started but not finished (only where the REDCap start-timestamp field exists). Control participants get no modules." }));
+    const grid = el("div", { class: "grid", style: "grid-template-columns:repeat(auto-fill,minmax(360px,1fr))" });
+    for (const e of events) {
+      for (const [cond, t] of Object.entries(e.training)) {
+        if (!t.n) continue;
+        const bars = el("div", { class: "bars" });
+        for (const m of t.modules) {
+          bars.append(el("span", { text: "Module " + m.module }),
+            el("div", { class: "track", role: "img", "aria-label": `Module ${m.module}: ${m.completed} of ${t.n} completed` },
+              el("div", { class: "fill", style: `width:${pct(m.completed, t.n)}%` }),
+              el("div", { class: "fill partial", style: `width:${pct(m.started_not_finished, t.n)}%` })),
+            el("span", { text: `${m.completed}/${t.n}` + (m.started_not_finished ? ` (+${m.started_not_finished})` : "") }));
+        }
+        grid.append(el("div", { class: "card" },
+          el("h3", { text: `Event ${e.event} · ${cond}` }),
+          el("div", { class: "muted", text: `${t.all_complete} of ${t.n} finished all assigned modules · ${t.none_started} not started` }),
+          el("div", { style: "height:0.5rem" }), bars));
+      }
+    }
+    root.append(grid);
+  }
+
+  /* ------------------------------------------------------------ quality */
+  function renderQuality(s) {
+    const root = $("quality"); root.replaceChildren();
+    if (!s) return;
+    const q = s.quality, flags = [];
+    if (q.duplicate_pids.length) flags.push(`Duplicate check-in PIDs (race condition): ${q.duplicate_pids.join(", ")}`);
+    if (q.missing_event) flags.push(`${q.missing_event} record(s) with no event number`);
+    if (q.missing_sex) flags.push(`${q.missing_sex} record(s) with no valid sex`);
+    if (q.missing_condition) flags.push(`${q.missing_condition} record(s) with no condition assigned`);
+    if (q.missing_token) flags.push(`${q.missing_token} record(s) with no training token`);
+    if (s.fields_missing_from_project.length) flags.push(`Fields not found in REDCap (some metrics skipped): ${s.fields_missing_from_project.join(", ")}`);
+    const card = el("div", { class: "card" }, el("div", { class: "muted", text: `${q.total_records} total records · counts as of ${s.today} (${s.timezone})` }));
+    card.append(flags.length ? el("ul", { class: "flags" }, flags.map(f => el("li", { text: f }))) : el("p", {}, el("span", { class: "badge ok", text: "No issues detected" })));
+    root.append(card);
+  }
+
+  /* ------------------------------------------------------------- session */
+  function signOut(msg) {
+    setSecret(""); clearInterval(timer); $("auto").checked = false;
+    $("app").classList.add("hidden"); $("login").classList.remove("hidden");
+    $("loginErr").textContent = msg || ""; $("secret").value = "";
+  }
+  function signIn() {
+    $("login").classList.add("hidden"); $("app").classList.remove("hidden"); load();
+  }
+  $("loginBtn").addEventListener("click", () => { const v = $("secret").value; if (!v) return; setSecret(v); signIn(); });
+  $("secret").addEventListener("keydown", e => { if (e.key === "Enter") $("loginBtn").click(); });
+  $("logoutBtn").addEventListener("click", () => signOut(""));
+  $("refreshBtn").addEventListener("click", load);
+  $("auto").addEventListener("change", e => { clearInterval(timer); if (e.target.checked) timer = setInterval(load, 60000); });
+  if (getSecret()) signIn();
+</script>
+</body>
+</html>
