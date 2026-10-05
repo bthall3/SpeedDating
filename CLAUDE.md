@@ -12,6 +12,7 @@ Static site for the University of Alabama Department of Psychology Speed Dating 
 - `checkin/index.html` — participant event check-in form.
 - `scorecard.html` — RA-facing (research assistant) iPad data-entry tool used *during* speed-dating events to record per-date ratings. Deliberately landscape-only, black-and-white, Georgia serif to mirror the physical paper scorecard it replaces (see the comment at the top of its `<style>` block).
 - `match-admin.html` — internal admin tool (noindex) that triggers match computation/emailing for an event and can download a CSV summary. Not participant-facing.
+- `dashboard.html` — researcher dashboard (noindex): Worker health + per-event enrollment/check-in/training/scorecard counts. Calls `workers/dashboard-stats` with a password typed per session (`sessionStorage`).
 - `training/index.html` — token-based dashboard entry point for the participant-facing DateSHARP pre-event training (`?token=...` resolved server-side by `resolve-token`; `demoMode` is off). Participants are assigned a condition at sign-up (`control` gets no modules, `review` gets modules 1-6, `practice` gets modules 1-7 plus the practice chatbot).
 - `training/module-1.html` through `module-7.html` — individual DateSHARP training modules.
 - `training/practice-chat.html` — simulated 4-minute practice conversation with an AI persona, part of module 7 for the `practice` condition.
@@ -26,7 +27,7 @@ Every page that needs a backend (submission, check-in, match computation, token 
 - `training/index.html` → `resolve-token.bthall3.workers.dev/resolve-token` (`GET ?t=<token>`)
 - `training/module-*.html`, `practice-chat.html` → per-module `submitEndpoint`/`saveEndpoint`/`chatEndpoint`/`feedbackEndpoint`/`logEndpoint`
 
-**None of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
+**Except `workers/dashboard-stats/` (below), none of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
 
 ## Styling conventions
 
@@ -37,3 +38,7 @@ Every page that needs a backend (submission, check-in, match computation, token 
 ## Client-side state
 
 Pages that need to remember state across visits use `localStorage` directly (no cookies, no server sessions for this purpose): `scorecard.html` persists the RA name/event number/session count (`scorecard_event`, `scorecard_ra_input`, `scorecard_count`); `training/index.html` tracks per-token welcome-modal dismissal (`welcomeSeen_<token>`).
+
+## Researcher dashboard Worker
+
+`workers/dashboard-stats/` is the one Worker whose source is versioned here (read-only; aggregates REDCap + probes the other Workers via service bindings). Deploy steps and probe limits are in its README. If you add a Worker, add a probe in `PROBES` and a binding in `wrangler.toml`; probes must never write data.

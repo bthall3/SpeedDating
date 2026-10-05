@@ -1,0 +1,75 @@
+name = "dashboard-stats"
+main = "index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+REDCAP_API_URL = "https://redcap.as.ua.edu/api/"
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never committed):
+#   REDCAP_API_TOKEN   -- use a READ-ONLY REDCap API token (export rights only)
+#   DASHBOARD_SECRET   -- long random string; typed into dashboard.html
+
+# One binding per probed Worker (workers.dev -> workers.dev fetches are blocked).
+[[services]]
+binding = "RESOLVE_TOKEN"
+service = "resolve-token"
+
+[[services]]
+binding = "MODULE1_SUBMIT"
+service = "module1-submit"
+
+[[services]]
+binding = "MODULE2_SUBMIT"
+service = "module2-submit"
+
+[[services]]
+binding = "MODULE3_SUBMIT"
+service = "module3-submit"
+
+[[services]]
+binding = "MODULE4_SUBMIT"
+service = "module4-submit"
+
+[[services]]
+binding = "MODULE5_SUBMIT"
+service = "module5-submit"
+
+[[services]]
+binding = "MODULE6_SUBMIT"
+service = "module6-submit"
+
+[[services]]
+binding = "MODULE7_PLANNING"
+service = "module7-planning"
+
+[[services]]
+binding = "PRACTICE_CHAT"
+service = "practice-chat"
+
+[[services]]
+binding = "PRACTICE_FEEDBACK"
+service = "practice-feedback"
+
+[[services]]
+binding = "PRACTICE_LOG"
+service = "practice-log"
+
+[[services]]
+binding = "QUALTRICS_INTAKE"
+service = "qualtrics-intake"
+
+[[services]]
+binding = "GENERATE_PARTICIPANT"
+service = "generate-participant"
+
+[[services]]
+binding = "CHECKIN"
+service = "checkin"
+
+[[services]]
+binding = "SCORECARD_SUBMIT"
+service = "scorecard-submit"
+
+[[services]]
+binding = "COMPUTE_MATCHES"
+service = "compute-matches"
