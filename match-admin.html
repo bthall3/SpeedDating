@@ -28,7 +28,7 @@
     border: 1px solid #e6ddd2;
     border-radius: 12px;
     padding: 2rem;
-    max-width: 420px;
+    max-width: 480px;
     width: 100%;
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   }
@@ -38,18 +38,26 @@
     color: var(--crimson);
     margin: 0 0 0.25rem;
   }
+  h2 {
+    font-size: 1rem;
+    margin: 1.6rem 0 0.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #e6ddd2;
+  }
   p.sub {
     margin: 0 0 1.5rem;
     color: #6b6259;
     font-size: 0.9rem;
   }
+  h2 + p.sub { margin-bottom: 1rem; }
   label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 0.3rem;
   }
-  input {
+  label.check { font-weight: 400; display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+  input[type=text], input[type=password] {
     width: 100%;
     padding: 0.6rem 0.7rem;
     border: 1px solid #d9cfc2;
@@ -57,6 +65,7 @@
     font-size: 1rem;
     margin-bottom: 1.1rem;
   }
+  input[type=file] { display: block; width: 100%; margin-bottom: 0.8rem; font-size: 0.9rem; }
   button {
     width: 100%;
     padding: 0.7rem;
@@ -70,6 +79,8 @@
   }
   button:hover { background: var(--crimson-soft); }
   button:disabled { opacity: 0.6; cursor: not-allowed; }
+  button.outline { background: #fff; color: var(--crimson); border: 1px solid var(--crimson); margin-top: 0.6rem; }
+  button.outline:hover { background: #f8eaed; }
   #result {
     margin-top: 1.2rem;
     font-size: 0.85rem;
@@ -86,7 +97,7 @@
 <body>
   <div class="card">
     <h1>Compute & Send Matches</h1>
-    <p class="sub">Runs after all scorecards for an event are entered. Safe to re-run — already-notified pairs are skipped.</p>
+    <p class="sub">Step 1 loads the scanned scorecards into REDCap. Step 2 runs after all scorecards for an event are in. Both are safe to re-run.</p>
 
     <label for="event">Event number</label>
     <input type="text" id="event" placeholder="e.g. 3" />
@@ -94,15 +105,30 @@
     <label for="secret">Admin password</label>
     <input type="password" id="secret" />
 
+    <h2>1 · Import scanned scorecards</h2>
+    <p class="sub">Choose the ratings CSV from the Speed Dating Scanner (<code>eventNN_ratings.csv</code>). Preview checks everything and writes nothing. Re-importing a corrected CSV updates cards in place, so there are no duplicates.</p>
+
+    <label for="csvfile">Ratings CSV</label>
+    <input type="file" id="csvfile" accept=".csv,text/csv" />
+
+    <label class="check"><input type="checkbox" id="skipInvalid" /> Skip rows with errors (import the rest)</label>
+
+    <button id="previewBtn">Preview import (writes nothing)</button>
+    <button id="importBtn" class="outline" disabled>Import to REDCap</button>
+
+    <h2>2 · Compute & send matches</h2>
+    <p class="sub">Already-notified people are skipped, so run this only after step 1 is finished and checked. Tip: Download CSV Summary first to look at the matches without emailing anyone.</p>
+
     <button id="runBtn">Compute & Send Matches</button>
-    <button id="csvBtn" style="margin-top:0.6rem; background:#fff; color:var(--crimson); border:1px solid var(--crimson);">Download CSV Summary</button>
+    <button id="csvBtn" class="outline">Download CSV Summary</button>
 
     <div id="result"></div>
   </div>
 
   <script>
-    // Set this to your deployed Worker URL after creating it in Cloudflare.
+    // Set these to your deployed Worker URLs after creating them in Cloudflare.
     const WORKER_URL = "https://compute-matches.bthall3.workers.dev";
+    const IMPORT_WORKER_URL = "https://import-scorecards.bthall3.workers.dev";
 
     const btn = document.getElementById("runBtn");
     const resultEl = document.getElementById("result");
@@ -189,6 +215,149 @@
         showResult("CSV downloaded. Move it to Box/OneDrive per IRB storage requirements — don't leave it sitting in Downloads.", false);
       } catch (err) {
         showResult("Network error: " + err.message, true);
+      }
+    });
+
+    // ---------------------------------------------------------------------
+    // Step 1: import scanned scorecards
+    // ---------------------------------------------------------------------
+    const previewBtn = document.getElementById("previewBtn");
+    const importBtn = document.getElementById("importBtn");
+    const fileInput = document.getElementById("csvfile");
+    const skipBox = document.getElementById("skipInvalid");
+    const REQUIRED_COLUMNS = ["perceiver_id", "target_id", "choice", "PhysicallyAttractive", "Charismatic", "Liked", "IWasNervous"];
+    let previewed = null; // { event, fileKey, skip, canImport, text } for the last good preview
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], cur = "", inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+          else if (c === '"') inQuotes = false;
+          else cur += c;
+        } else if (c === '"') inQuotes = true;
+        else if (c === ",") { row.push(cur); cur = ""; }
+        else if (c === "\n" || c === "\r") {
+          if (c === "\r" && text[i + 1] === "\n") i++;
+          row.push(cur); cur = "";
+          if (row.some((v) => v !== "")) rows.push(row);
+          row = [];
+        } else cur += c;
+      }
+      row.push(cur);
+      if (row.some((v) => v !== "")) rows.push(row);
+      if (rows.length < 2) return [];
+      const header = rows[0].map((h) => h.trim());
+      return rows.slice(1).map((r) => Object.fromEntries(header.map((h, i) => [h, (r[i] ?? "").trim()])));
+    }
+
+    async function readCsvRows() {
+      const file = fileInput.files[0];
+      if (!file) throw new Error("Choose the ratings CSV first.");
+      const rows = parseCsv(await file.text());
+      if (!rows.length) throw new Error("That CSV has no data rows.");
+      const missing = REQUIRED_COLUMNS.filter((c) => !(c in rows[0]));
+      if (missing.length) throw new Error("That doesn't look like a Speed Dating Scanner ratings CSV. Missing columns: " + missing.join(", "));
+      return { rows, fileKey: file.name + ":" + file.size + ":" + file.lastModified };
+    }
+
+    function listBlock(title, items, count) {
+      if (!items || !items.length) return "";
+      const more = count > items.length ? `\n  ...and ${count - items.length} more` : "";
+      return `\n${title}\n` + items.map((x) => "  - " + x).join("\n") + more + "\n";
+    }
+
+    function describeImport(d, wasReal) {
+      const lines = [
+        wasReal ? `IMPORTED to REDCap (event ${d.event})` : `PREVIEW — nothing written yet (event ${d.event})`,
+        `Attendees found in REDCap: ${d.attendeesFound}`,
+        `Rows in CSV: ${d.rowsReceived}`,
+        `New scorecards: ${d.toCreate}`,
+        `Updated (already existed, values changed): ${d.toReplace}`,
+        `Unchanged: ${d.unchanged}`,
+      ];
+      if (wasReal) lines.push(`Rows written: ${d.imported}`);
+      let out = lines.join("\n") + "\n";
+      out += listBlock(`ERRORS (${d.errorCount}) — these rows will not be imported:`, d.errors, d.errorCount);
+      out += listBlock(`Warnings (${d.warningCount}):`, d.warnings, d.warningCount);
+      out += listBlock("Updated cards:", d.replaceDetails, d.toReplace);
+      if (d.changedAfterEmail && d.changedAfterEmail.length) {
+        out += `\n⚠ "See again" answers changed for people whose match emails were ALREADY sent: ${d.changedAfterEmail.join(", ")}.\n  Re-running Compute & Send will not email them again.\n`;
+      }
+      if (d.attendeesWithNoCards && d.attendeesWithNoCards.length) {
+        out += `\nAttendees with no scorecards from them yet (missing PDF or pages?): ${d.attendeesWithNoCards.join(", ")}\n`;
+      }
+      if (d.message) out += "\n" + d.message + "\n";
+      return out;
+    }
+
+    async function postImport(payload) {
+      const res = await fetch(IMPORT_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.status);
+      return data;
+    }
+
+    function invalidatePreview() {
+      previewed = null;
+      importBtn.disabled = true;
+    }
+    fileInput.addEventListener("change", invalidatePreview);
+    skipBox.addEventListener("change", invalidatePreview);
+    document.getElementById("event").addEventListener("input", invalidatePreview);
+
+    previewBtn.addEventListener("click", async () => {
+      const event = document.getElementById("event").value.trim();
+      const adminSecret = document.getElementById("secret").value;
+      if (!event || !adminSecret) { showResult("Enter both an event number and the admin password.", true); return; }
+
+      previewBtn.disabled = true;
+      previewBtn.textContent = "Checking...";
+      invalidatePreview();
+      try {
+        const { rows, fileKey } = await readCsvRows();
+        const d = await postImport({ event, adminSecret, rows, dryRun: true, skipInvalid: skipBox.checked });
+        showResult(d.blocked ? d.message : describeImport(d, false), !!d.blocked || d.errorCount > 0);
+        const hasWork = d.toCreate + d.toReplace > 0;
+        const okToImport = !d.blocked && hasWork && (d.errorCount === 0 || skipBox.checked);
+        previewed = okToImport ? { event, fileKey, skip: skipBox.checked, toCreate: d.toCreate, toReplace: d.toReplace } : null;
+        importBtn.disabled = !okToImport;
+        if (!d.blocked && !hasWork && d.errorCount === 0) {
+          resultEl.textContent += "\nNothing to import — REDCap already has all of these scorecards.";
+        }
+      } catch (err) {
+        showResult(err.message, true);
+      } finally {
+        previewBtn.disabled = false;
+        previewBtn.textContent = "Preview import (writes nothing)";
+      }
+    });
+
+    importBtn.addEventListener("click", async () => {
+      const event = document.getElementById("event").value.trim();
+      const adminSecret = document.getElementById("secret").value;
+      if (!previewed || previewed.event !== event) { showResult("Run Preview first.", true); return; }
+      if (!confirm(`Import ${previewed.toCreate} new and ${previewed.toReplace} updated scorecards into REDCap for event ${event}?`)) return;
+
+      importBtn.disabled = true;
+      importBtn.textContent = "Importing...";
+      try {
+        const { rows, fileKey } = await readCsvRows();
+        if (fileKey !== previewed.fileKey) throw new Error("The file changed since the preview. Run Preview again.");
+        const d = await postImport({ event, adminSecret, rows, dryRun: false, skipInvalid: previewed.skip });
+        showResult(d.blocked ? d.message : describeImport(d, true), !!d.blocked);
+        previewed = null;
+      } catch (err) {
+        showResult(err.message, true);
+        importBtn.disabled = false;
+      } finally {
+        importBtn.textContent = "Import to REDCap";
       }
     });
 
