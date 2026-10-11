@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Event Timer</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  /* Self-contained RA/admin tool: projected or iPad-mounted during events.
+     Phase color fills the whole screen so it reads from across the room. */
+  :root {
+    --crimson: #9E1B32;
+    --gold: #b8924a;
+    --ink: #24211f;
+    --date: #1f5f46;
+    --card: #8a6a2c;
+    --rotate: #9E1B32;
+    --idle: #2b241f;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--idle);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: background .4s;
+    -webkit-user-select: none; user-select: none;
+  }
+  body[data-phase="date"]   { background: var(--date); }
+  body[data-phase="card"]   { background: var(--card); }
+  body[data-phase="rotate"] { background: var(--rotate); }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.5rem; font-size: 1.1rem; opacity: .9;
+  }
+  #clock { font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #round { font-size: 1.4rem; font-weight: 600; }
+  #gear { background: none; border: 1px solid rgba(255,255,255,.4); color: #fff;
+          border-radius: 8px; padding: .4rem .8rem; font-size: 1rem; cursor: pointer; }
+
+  main {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 0 1rem;
+  }
+  #label { font-size: clamp(1.8rem, 6vw, 4rem); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  #time  { font-size: clamp(6rem, 28vw, 22rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  #sub   { font-size: clamp(1.1rem, 3vw, 2rem); opacity: .85; min-height: 1.5em; }
+  body.low #time { animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .55; } }
+
+  #bar { height: 10px; background: rgba(255,255,255,.2); }
+  #fill { height: 100%; width: 0; background: #fff; }
+
+  footer { display: flex; gap: 1rem; justify-content: center; padding: 1.25rem; flex-wrap: wrap; }
+  footer button {
+    font: inherit; font-size: 1.4rem; font-weight: 600; color: #fff; cursor: pointer;
+    background: rgba(0,0,0,.28); border: 2px solid rgba(255,255,255,.6);
+    border-radius: 12px; padding: .8rem 2rem; min-width: 8rem;
+  }
+  footer button.primary { background: #fff; color: var(--ink); border-color: #fff; min-width: 12rem; }
+  footer button:active { transform: scale(.97); }
+
+  dialog { border: none; border-radius: 12px; padding: 1.5rem; color: var(--ink); max-width: 22rem; width: 90%; }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog h2 { margin-top: 0; }
+  dialog label { display: flex; justify-content: space-between; align-items: center; margin: .6rem 0; gap: 1rem; }
+  dialog input[type=number] { width: 5.5rem; font-size: 1rem; padding: .3rem; }
+  dialog .row { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1rem; }
+  dialog button { font: inherit; padding: .5rem 1rem; border-radius: 8px; border: 1px solid #999; background: #fff; cursor: pointer; }
+  dialog button.ok { background: var(--crimson); color: #fff; border-color: var(--crimson); }
+</style>
+</head>
+<body data-phase="idle">
+
+<header>
+  <div id="round">Ready</div>
+  <div id="clock">--:--:--</div>
+  <button id="gear" type="button">Settings</button>
+</header>
+
+<main>
+  <div id="label">Ready to start</div>
+  <div id="time">4:00</div>
+  <div id="sub"></div>
+</main>
+
+<div id="bar"><div id="fill"></div></div>
+
+<footer>
+  <button id="back" type="button">&larr; Back</button>
+  <button id="toggle" class="primary" type="button">Start</button>
+  <button id="next" type="button">Next &rarr;</button>
+  <button id="reset" type="button">Reset</button>
+</footer>
+
+<dialog id="settings">
+  <h2>Settings</h2>
+  <label>Date length (min) <input id="s-date" type="number" min="0.5" step="0.5"></label>
+  <label>Scorecard time (sec) <input id="s-card" type="number" min="5" step="5"></label>
+  <label>Rotate time (sec) <input id="s-rotate" type="number" min="5" step="5"></label>
+  <label>Total rounds (0 = no limit) <input id="s-rounds" type="number" min="0" step="1"></label>
+  <label>Auto-advance phases <input id="s-auto" type="checkbox"></label>
+  <label>Sound <input id="s-sound" type="checkbox"></label>
+  <div class="row">
+    <button id="s-cancel" type="button">Cancel</button>
+    <button id="s-save" class="ok" type="button">Save</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  var DEFAULTS = { dateMin: 4, cardSec: 60, rotateSec: 30, rounds: 0, auto: true, sound: true };
+  var cfg = Object.assign({}, DEFAULTS);
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem('eventtimer_cfg') || '{}')); } catch (e) {}
+
+  var LABELS = { date: 'Date', card: 'Fill out scorecard', rotate: 'Rotate!' };
+  var SUBS = {
+    date: 'Conversation time',
+    card: 'Please complete your scorecard',
+    rotate: 'Move to your next date'
+  };
+  var ORDER = ['date', 'card', 'rotate'];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { phase: 'idle', round: 0, running: false, endAt: 0, remaining: 0, total: 0, done: false };
+  var audioCtx = null, wakeLock = null;
+
+  function dur(phase) {
+    return phase === 'date' ? cfg.dateMin * 60000 : phase === 'card' ? cfg.cardSec * 1000 : cfg.rotateSec * 1000;
+  }
+
+  function beep(freq, ms, times) {
+    if (!cfg.sound) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      for (var i = 0; i < times; i++) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.frequency.value = freq; o.connect(g); g.connect(audioCtx.destination);
+        var t = audioCtx.currentTime + i * (ms / 1000 + 0.12);
+        g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + ms / 1000);
+        o.start(t); o.stop(t + ms / 1000);
+      }
+    } catch (e) {}
+  }
+
+  function fmt(ms) {
+    var s = Math.max(0, Math.ceil(ms / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function enter(phase, autoRun) {
+    state.phase = phase;
+    if (phase === 'date') state.round++;
+    state.total = state.remaining = dur(phase);
+    state.running = !!autoRun;
+    state.endAt = Date.now() + state.remaining;
+    // end-of-phase cues: date ending -> scorecards; card ending -> rotate; rotate ending -> date
+    if (phase === 'card') beep(660, 350, 2);
+    else if (phase === 'rotate') beep(880, 300, 3);
+    else if (phase === 'date') beep(520, 500, 1);
+    render();
+  }
+
+  function nextPhase(autoRun) {
+    var i = ORDER.indexOf(state.phase);
+    if (state.phase === 'rotate' && cfg.rounds > 0 && state.round >= cfg.rounds) {
+      state.phase = 'idle'; state.running = false; state.done = true; render(); return;
+    }
+    enter(ORDER[(i + 1) % ORDER.length], autoRun);
+  }
+
+  function prevPhase() {
+    if (state.phase === 'idle') return;
+    var wasRunning = state.running;
+    var prev = ORDER[(ORDER.indexOf(state.phase) + 2) % ORDER.length];
+    if (state.phase === 'date') {
+      if (state.round <= 1) { enter('date', wasRunning); state.round = 1; render(); return; } // restart first date
+      state.round--;          // back into the previous round's rotate
+    } else if (prev === 'date') {
+      state.round--;          // enter('date') re-increments
+    }
+    enter(prev, wasRunning);
+  }
+
+  function toggle() {
+    unlockAudio();
+    if (state.phase === 'idle') {
+      state.done = false; state.round = 0;
+      enter('date', true); requestWake(); return;
+    }
+    if (state.running) {
+      state.remaining = Math.max(0, state.endAt - Date.now());
+      state.running = false;
+    } else {
+      state.endAt = Date.now() + state.remaining;
+      state.running = true; requestWake();
+    }
+    render();
+  }
+
+  function resetAll() {
+    state.phase = 'idle'; state.round = 0; state.running = false; state.done = false;
+    state.total = state.remaining = dur('date');
+    render();
+  }
+
+  function unlockAudio() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+
+  function requestWake() {
+    try {
+      if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function (l) { wakeLock = l; }).catch(function () {});
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && state.running) requestWake();
+  });
+
+  function render() {
+    var p = state.phase;
+    document.body.dataset.phase = p;
+    var ms = state.running ? Math.max(0, state.endAt - Date.now()) : state.remaining;
+    $('time').textContent = fmt(ms);
+    document.body.classList.toggle('low', state.running && ms <= 10000 && ms > 0);
+    $('fill').style.width = state.total ? (100 - ms / state.total * 100) + '%' : '0';
+
+    if (p === 'idle') {
+      $('label').textContent = state.done ? 'Event complete' : 'Ready to start';
+      $('sub').textContent = state.done ? 'All ' + cfg.rounds + ' rounds finished' : '';
+      $('round').textContent = state.done ? 'Done' : 'Ready';
+      $('time').textContent = state.done ? '' : fmt(dur('date'));
+      $('toggle').textContent = state.done ? 'Restart' : 'Start';
+    } else {
+      $('label').textContent = LABELS[p];
+      $('sub').textContent = state.running ? SUBS[p] : 'Paused';
+      $('round').textContent = 'Round ' + state.round + (cfg.rounds > 0 ? ' of ' + cfg.rounds : '');
+      $('toggle').textContent = state.running ? 'Pause' : 'Resume';
+    }
+  }
+
+  function tick() {
+    var d = new Date();
+    $('clock').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    if (state.running) {
+      if (state.endAt - Date.now() <= 0) {
+        if (cfg.auto) nextPhase(true);
+        else { state.running = false; state.remaining = 0; beep(440, 600, 1); render(); }
+      } else render();
+    }
+  }
+  setInterval(tick, 200);
+
+  // Controls
+  $('toggle').onclick = toggle;
+  $('next').onclick = function () { unlockAudio(); if (state.phase === 'idle') toggle(); else nextPhase(state.running); };
+  $('back').onclick = prevPhase;
+  $('reset').onclick = function () { if (state.phase === 'idle' || confirm('Reset the timer and round count?')) resetAll(); };
+  document.addEventListener('keydown', function (e) {
+    if ($('settings').open) return;
+    if (e.code === 'Space') { e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'n') $('next').click();
+    else if (e.key === 'ArrowLeft') $('back').click();
+  });
+
+  // Settings
+  $('gear').onclick = function () {
+    $('s-date').value = cfg.dateMin; $('s-card').value = cfg.cardSec; $('s-rotate').value = cfg.rotateSec;
+    $('s-rounds').value = cfg.rounds; $('s-auto').checked = cfg.auto; $('s-sound').checked = cfg.sound;
+    $('settings').showModal();
+  };
+  $('s-cancel').onclick = function () { $('settings').close(); };
+  $('s-save').onclick = function () {
+    var n = function (id, def, min) { var v = parseFloat($(id).value); return isFinite(v) && v >= min ? v : def; };
+    cfg.dateMin = n('s-date', cfg.dateMin, 0.5);
+    cfg.cardSec = n('s-card', cfg.cardSec, 5);
+    cfg.rotateSec = n('s-rotate', cfg.rotateSec, 5);
+    cfg.rounds = Math.floor(n('s-rounds', cfg.rounds, 0));
+    cfg.auto = $('s-auto').checked; cfg.sound = $('s-sound').checked;
+    try { localStorage.setItem('eventtimer_cfg', JSON.stringify(cfg)); } catch (e) {}
+    $('settings').close();
+    if (state.phase === 'idle') resetAll(); else render();
+  };
+
+  resetAll();
+  tick();
+})();
+</script>
+</body>
+</html>
