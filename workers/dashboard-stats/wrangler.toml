@@ -73,3 +73,7 @@ service = "scorecard-submit"
 [[services]]
 binding = "COMPUTE_MATCHES"
 service = "compute-matches"
+
+[[services]]
+binding = "RESCHEDULE_PARTICIPANT"
+service = "reschedule-participant"

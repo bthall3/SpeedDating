@@ -39,6 +39,10 @@ Every page that needs a backend (submission, check-in, match computation, token 
 
 Pages that need to remember state across visits use `localStorage` directly (no cookies, no server sessions for this purpose): `scorecard.html` persists the RA name/event number/session count (`scorecard_event`, `scorecard_ra_input`, `scorecard_count`); `training/index.html` tracks per-token welcome-modal dismissal (`welcomeSeen_<token>`).
 
+## Reschedule Worker
+
+`workers/reschedule-participant/` backs the "Reschedule a participant" form on `dashboard.html`. It previews (dry run) then applies by replaying the participant's stored values through `qualtrics-intake` via a service binding, so the date math and `generate-participant` stay in one place. It only reads REDCap itself (read-only token). Deploy it **before** redeploying `dashboard-stats`, whose `wrangler.toml` binds to it. Secrets: `REDCAP_API_TOKEN`, `DASHBOARD_SECRET` (same as dashboard-stats), `QUALTRICS_SHARED_SECRET` (same as qualtrics-intake).
+
 ## Researcher dashboard Worker
 
 `workers/dashboard-stats/` is the one Worker whose source is versioned here (read-only; aggregates REDCap + probes the other Workers via service bindings). Deploy steps and probe limits are in its README. If you add a Worker, add a probe in `PROBES` and a binding in `wrangler.toml`; probes must never write data.
