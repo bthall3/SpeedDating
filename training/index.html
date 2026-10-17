@@ -327,6 +327,18 @@
   text-decoration: underline;
 }
 
+/* Agreement overlay (reuses .welcome-overlay / .welcome-box) */
+.agree-statement {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--crimson);
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 0 10px 10px 0;
+  text-align: left;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
 @media (max-width: 480px) {
   .hero-h1 { font-size: 32px; }
   .node { width: 44px; height: 44px; font-size: 15px; margin-top: 10px; }
@@ -354,6 +366,16 @@
       </details>
       <div class="welcome-actions">
         <button class="welcome-continue" id="welcomeContinueBtn">Continue to your training</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="agreementOverlay" class="welcome-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="agreementTitle">
+    <div class="welcome-box">
+      <h2 class="welcome-h2" id="agreementTitle">Please confirm your agreement with the following statement:</h2>
+      <p class="agree-statement">I understand that I am expected to complete the DateSHARP program modules before attending my speed-dating event. I give the researchers my word that I will complete the modules attentively and fully.</p>
+      <div class="welcome-actions">
+        <button class="welcome-continue" id="agreementBtn">I understand and give the researchers my word</button>
       </div>
     </div>
   </div>
@@ -545,7 +567,7 @@ function renderDashboard(token, data) {
   }
 
   renderDashboard(token || "DEMO", data);
-  maybeShowWelcome(token || "DEMO");
+  maybeShowAgreement(token || "DEMO", () => maybeShowWelcome(token || "DEMO"));
 })();
 
 function maybeShowWelcome(tokenKey) {
@@ -566,6 +588,28 @@ function maybeShowWelcome(tokenKey) {
 
   continueBtn.addEventListener("click", dismiss);
   video.addEventListener("ended", dismiss);
+}
+
+// The first thing a participant sees, before the welcome video. Shown once per
+// token and deliberately not dismissible any other way than the button (no
+// close icon, Escape or backdrop click). Stored in this browser only; it is
+// not sent to REDCap. Separate key from the welcome video so people who
+// already saw the video still get asked. `next` runs once it is cleared.
+function maybeShowAgreement(tokenKey, next) {
+  const storageKey = `agreementSeen_${tokenKey}`;
+  try { if (localStorage.getItem(storageKey)) { next(); return; } } catch {}
+
+  const overlay = document.getElementById("agreementOverlay");
+  const btn = document.getElementById("agreementBtn");
+
+  overlay.classList.remove("hidden");
+  btn.focus();
+
+  btn.addEventListener("click", () => {
+    try { localStorage.setItem(storageKey, "1"); } catch {}
+    overlay.classList.add("hidden");
+    next();
+  }, { once: true });
 }
 </script>
 
