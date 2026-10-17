@@ -58,7 +58,8 @@ const PROBES = [
   { id: "generate-participant", group: "Intake & events", binding: "GENERATE_PARTICIPANT", method: "POST", path: "/generate-participant", expect: [401], note: "unauthenticated POST -> 401" },
   { id: "checkin",           group: "Intake & events", binding: "CHECKIN",           method: "OPTIONS", path: "/check-in", expect: [200, 204], note: "liveness only (PIN-gated)" },
   { id: "scorecard-submit",  group: "Intake & events", binding: "SCORECARD_SUBMIT",  method: "POST", path: "/submit", body: "{}", expect: [422], note: "empty body -> 422" },
-  { id: "compute-matches",   group: "Intake & events", binding: "COMPUTE_MATCHES",   method: "OPTIONS", path: "/", expect: [200, 204], note: "liveness only; never POSTed" }
+  { id: "compute-matches",   group: "Intake & events", binding: "COMPUTE_MATCHES",   method: "OPTIONS", path: "/", expect: [200, 204], note: "liveness only; never POSTed" },
+  { id: "reschedule-participant", group: "Intake & events", binding: "RESCHEDULE_PARTICIPANT", method: "OPTIONS", path: "/reschedule", expect: [200, 204], note: "liveness only; never POSTed" }
 ];
 
 /* ------------------------------------------------------------------ http */

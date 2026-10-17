@@ -68,6 +68,13 @@
   .fill.partial { background: var(--bar-partial); }
   ul.flags { margin: 0.3rem 0 0 1.1rem; padding: 0; font-size: 0.88rem; }
   .err { color: var(--bad); font-weight: 600; }
+
+  .form { display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
+  .form label { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-bottom: 0.25rem; }
+  .form input[type=text], .form input[type=email], .form input[type=date], .form select { padding: 0.55rem 0.7rem; border: 1px solid #d9cfc2; border-radius: 8px; font-size: 0.95rem; width: 100%; background: #fff; }
+  #rsResult { margin-top: 0.9rem; font-size: 0.9rem; }
+  #rsResult table { max-width: 520px; }
+  #rsResult .warns { margin: 0.5rem 0; }
 </style>
 </head>
 <body>
@@ -100,6 +107,19 @@
     <h2>Events</h2>
     <div id="events"></div>
 
+    <h2>Reschedule a participant</h2>
+    <div class="card">
+      <p class="muted" style="margin-top:0">Moves one person to a different event, or gives an event to someone who finished sign-up without one. You'll see a preview first; nothing changes until you confirm. Not available once they have checked in.</p>
+      <div class="form">
+        <div><label for="rsEmail">Participant email</label><input type="email" id="rsEmail" autocomplete="off" /></div>
+        <div><label for="rsEvent">Move to event</label><select id="rsEvent"></select></div>
+        <div id="rsOtherNum" class="hidden"><label for="rsNum">Event number</label><input type="text" id="rsNum" autocomplete="off" /></div>
+        <div id="rsOtherDate" class="hidden"><label for="rsDate">Event date</label><input type="date" id="rsDate" /></div>
+        <div><button id="rsPreviewBtn">Preview</button></div>
+      </div>
+      <div id="rsResult" aria-live="polite"></div>
+    </div>
+
     <h2>Training progress</h2>
     <div id="training"></div>
 
@@ -111,6 +131,8 @@
 <script>
   // Deployed from workers/dashboard-stats. Update if your subdomain differs.
   const WORKER_URL = "https://dashboard-stats.bthall3.workers.dev/snapshot";
+  // Deployed from workers/reschedule-participant (same password as above).
+  const RESCHEDULE_URL = "https://reschedule-participant.bthall3.workers.dev/reschedule";
   const SS_KEY = "dashboard_secret"; // sessionStorage: cleared when the tab closes
 
   const $ = id => document.getElementById(id);
@@ -147,6 +169,7 @@
     $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
     renderHealth(d.health, d.errors && d.errors.health);
     renderEvents(d.stats, d.errors && d.errors.stats);
+    fillEventSelect(d.stats);
     renderTraining(d.stats);
     renderQuality(d.stats);
   }
@@ -263,6 +286,96 @@
     card.append(flags.length ? el("ul", { class: "flags" }, flags.map(f => el("li", { text: f }))) : el("p", {}, el("span", { class: "badge ok", text: "No issues detected" })));
     root.append(card);
   }
+
+  /* --------------------------------------------------------- reschedule */
+  const OTHER = "__other__";
+
+  // Only upcoming events with a known date are offered; anything else goes through "Other".
+  function fillEventSelect(s) {
+    const sel = $("rsEvent"), prev = sel.value;
+    sel.replaceChildren();
+    const upcoming = s ? s.events.filter(e => e.event_date && e.days_until !== null && e.days_until >= 0) : [];
+    for (const e of upcoming) sel.append(el("option", { value: e.event, text: `Event ${e.event} · ${e.event_date}` }));
+    sel.append(el("option", { value: OTHER, text: "Other (new event)…" }));
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    syncOther();
+  }
+  function syncOther() {
+    const other = $("rsEvent").value === OTHER;
+    $("rsOtherNum").classList.toggle("hidden", !other);
+    $("rsOtherDate").classList.toggle("hidden", !other);
+  }
+  $("rsEvent").addEventListener("change", syncOther);
+
+  function rsShow(...kids) { const r = $("rsResult"); r.replaceChildren(...kids.flat().filter(Boolean)); }
+  const rsErr = msg => rsShow(el("div", { class: "err", text: msg }));
+
+  async function rsCall(confirm) {
+    const email = $("rsEmail").value.trim();
+    const other = $("rsEvent").value === OTHER;
+    const body = { email, event_num: other ? $("rsNum").value.trim() : $("rsEvent").value, confirm };
+    if (other && $("rsDate").value) body.event_date = $("rsDate").value;
+    if (!email) { rsErr("Enter the participant's email."); return null; }
+    if (!body.event_num) { rsErr("Enter an event number."); return null; }
+    let res, data;
+    try {
+      res = await fetch(RESCHEDULE_URL, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + getSecret(), "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      data = await res.json();
+    } catch (err) { rsErr("Could not reach the reschedule Worker. Is reschedule-participant deployed?"); return null; }
+    if (res.status === 401) { signOut("Wrong password."); return null; }
+    if (!res.ok) { rsErr(data.error || "HTTP " + res.status); return null; }
+    return data;
+  }
+
+  const fmt = v => v || "—";
+  function changeTable(before, after) {
+    const row = (label, b, a) => el("tr", {}, el("td", { text: label }), el("td", { text: fmt(b) }), el("td", { text: fmt(a) }));
+    const t = el("table", {}, el("tr", {}, el("th", { text: "" }), el("th", { text: "Before" }), el("th", { text: "After" })));
+    t.append(row("Event", before.event_num, after.event_num), row("Event date", before.event_date, after.event_date));
+    if ("training_email_date" in after) {
+      t.append(row("Training email date", before.training_email_date, after.training_email_date),
+        row("Day-before date", before.day_before_date, after.day_before_date),
+        row("Condition", before.condition, after.condition),
+        row("Training token", before.has_token ? "yes" : "no", after.has_token ? "yes" : "no"));
+    }
+    return t;
+  }
+  const warnList = w => w && w.length ? el("ul", { class: "flags warns" }, w.map(x => el("li", { text: x }))) : null;
+
+  async function rsPreview() {
+    $("rsPreviewBtn").disabled = true;
+    try {
+      const d = await rsCall(false);
+      if (!d) return;
+      const confirmBtn = el("button", { id: "rsConfirmBtn", text: "Confirm reschedule" });
+      confirmBtn.addEventListener("click", rsConfirm);
+      rsShow(
+        el("p", { text: `${d.preview.first_name || "This participant"} will move to event ${d.preview.after.event_num} on ${d.preview.after.event_date} (in ${d.preview.after.days_until} day${d.preview.after.days_until === 1 ? "" : "s"}).` }),
+        changeTable(d.preview.before, d.preview.after),
+        warnList(d.preview.warnings),
+        el("p", { class: "muted", text: "Confirming recalculates the training and day-before email dates and assigns their training link if they don't have one." }),
+        confirmBtn);
+    } finally { $("rsPreviewBtn").disabled = false; }
+  }
+
+  async function rsConfirm() {
+    const btn = $("rsConfirmBtn"); if (btn) btn.disabled = true;
+    const d = await rsCall(true);
+    if (!d) { if (btn) btn.disabled = false; return; }
+    rsShow(
+      el("div", { class: "banner " + (d.complete ? "ok" : "warn"), text: d.complete ? "Rescheduled. Record is fully populated." : "Sent, but the record looks incomplete." }),
+      el("div", { style: "height:0.6rem" }),
+      d.after ? changeTable(d.before, d.after) : null,
+      warnList(d.warnings));
+    $("rsEmail").value = "";
+    load();
+  }
+  $("rsPreviewBtn").addEventListener("click", rsPreview);
+  $("rsEmail").addEventListener("keydown", e => { if (e.key === "Enter") rsPreview(); });
 
   /* ------------------------------------------------------------- session */
   function signOut(msg) {

@@ -1,0 +1,15 @@
+name = "reschedule-participant"
+main = "index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+REDCAP_API_URL = "https://redcap.as.ua.edu/api/"
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never committed):
+#   REDCAP_API_TOKEN         -- READ-ONLY (export) REDCap token; this Worker never writes
+#   DASHBOARD_SECRET         -- same value as dashboard-stats (the dashboard password)
+#   QUALTRICS_SHARED_SECRET  -- same value as qualtrics-intake; used to call it
+
+[[services]]
+binding = "QUALTRICS_INTAKE"
+service = "qualtrics-intake"
