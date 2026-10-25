@@ -51,6 +51,13 @@
   body.low #time { animation: pulse 1s infinite; }
   @keyframes pulse { 50% { opacity: .55; } }
 
+  #flash { position: fixed; inset: 0; display: none; z-index: 50; cursor: pointer;
+           align-items: center; justify-content: center; text-align: center;
+           font-size: clamp(3rem, 14vw, 10rem); font-weight: 800; letter-spacing: .06em;
+           text-transform: uppercase; color: #fff; animation: alarm .5s steps(1) infinite; }
+  #flash.on { display: flex; }
+  @keyframes alarm { 0% { background: #ff0000; } 50% { background: #5a0000; } }
+
   #bar { height: 10px; background: rgba(255,255,255,.2); }
   #fill { height: 100%; width: 0; background: #fff; }
 
@@ -96,6 +103,8 @@
   <button id="reset" type="button">Reset</button>
 </footer>
 
+<div id="flash"></div>
+
 <dialog id="settings">
   <h2>Settings</h2>
   <label>Date length (min) <input id="s-date" type="number" min="0.5" step="0.5"></label>
@@ -132,35 +141,53 @@
     return phase === 'date' ? cfg.dateMin * 60000 : phase === 'card' ? cfg.cardSec * 1000 : cfg.rotateSec * 1000;
   }
 
+  // Loud square-wave alarm through a compressor; actual loudness is capped by device volume.
   function beep(freq, ms, times) {
     if (!cfg.sound) return;
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var comp = audioCtx.createDynamicsCompressor();
+      comp.connect(audioCtx.destination);
       for (var i = 0; i < times; i++) {
         var o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.frequency.value = freq; o.connect(g); g.connect(audioCtx.destination);
-        var t = audioCtx.currentTime + i * (ms / 1000 + 0.12);
-        g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + ms / 1000);
+        o.type = 'square';
+        o.frequency.value = (i % 2) ? freq * 1.25 : freq;   // alternate pitch so it cuts through room noise
+        o.connect(g); g.connect(comp);
+        var t = audioCtx.currentTime + i * (ms / 1000 + 0.08);
+        g.gain.setValueAtTime(1.0, t); g.gain.setValueAtTime(1.0, t + ms / 1000 - 0.03);
+        g.gain.linearRampToValueAtTime(0.0001, t + ms / 1000);
         o.start(t); o.stop(t + ms / 1000);
       }
     } catch (e) {}
   }
+
+  var flashTimer = null;
+  function flash(text, ms) {
+    var f = $('flash');
+    f.textContent = text;
+    f.classList.add('on');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { f.classList.remove('on'); }, ms);
+  }
+  $('flash').onclick = function () { clearTimeout(flashTimer); this.classList.remove('on'); };
 
   function fmt(ms) {
     var s = Math.max(0, Math.ceil(ms / 1000));
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   }
 
-  function enter(phase, autoRun) {
+  function enter(phase, autoRun, silent) {
     state.phase = phase;
     if (phase === 'date') state.round++;
     state.total = state.remaining = dur(phase);
     state.running = !!autoRun;
     state.endAt = Date.now() + state.remaining;
-    // end-of-phase cues: date ending -> scorecards; card ending -> rotate; rotate ending -> date
-    if (phase === 'card') beep(660, 350, 2);
-    else if (phase === 'rotate') beep(880, 300, 3);
-    else if (phase === 'date') beep(520, 500, 1);
+    // Alarm for the phase that is starting (i.e. the previous one just ended). Silent on initial Start.
+    if (!silent) {
+      if (phase === 'card')        { beep(660, 450, 6); flash('Time!', 3500); }
+      else if (phase === 'rotate') { beep(880, 400, 8); flash('Rotate!', 4500); }
+      else if (phase === 'date')   { beep(520, 450, 6); flash('Begin!', 3000); }
+    }
     render();
   }
 
@@ -189,7 +216,7 @@
     unlockAudio();
     if (state.phase === 'idle') {
       state.done = false; state.round = 0;
-      enter('date', true); requestWake(); return;
+      enter('date', true, true); requestWake(); return;
     }
     if (state.running) {
       state.remaining = Math.max(0, state.endAt - Date.now());
@@ -251,7 +278,7 @@
     if (state.running) {
       if (state.endAt - Date.now() <= 0) {
         if (cfg.auto) nextPhase(true);
-        else { state.running = false; state.remaining = 0; beep(440, 600, 1); render(); }
+        else { state.running = false; state.remaining = 0; beep(440, 500, 6); flash('Time!', 3500); render(); }
       } else render();
     }
   }
