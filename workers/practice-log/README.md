@@ -4,7 +4,7 @@ Saves module 7 practice dates (the AI chatbot conversation) to REDCap. See the
 header comment in `index.js` for the full data flow. In short:
 
 - Every practice date ("attempt") becomes one instance of the **repeating**
-  instrument `m7c_attempt_log` (`m7a_*` fields).
+  instrument `module_7_chatbot_log` (`m7a_*` fields).
 - The page saves each attempt twice under one `attempt_id`: automatically when
   the timer ends (`m7a_stage = timer_end`, no feedback yet), then again when
   the participant clicks Complete Module (`m7a_stage = completed`, with
@@ -24,7 +24,7 @@ old Worker is still deployed, the old Worker treats the timer-end save as the
 completion: it marks the module complete with no feedback ratings, and then
 drops the Complete Module save.
 
-### 1. REDCap: create the `m7c_attempt_log` instrument
+### 1. REDCap: create the `module_7_chatbot_log` instrument
 
 If the project is in **Production**, Online Designer changes go into Draft
 Mode. Submit them afterwards; adding a new instrument is normally approved
@@ -33,9 +33,9 @@ automatically, but your REDCap admins may need to review it.
 **Option A: Online Designer (safer).**
 
 1. Project Setup → **Online Designer** → (Production: **Enter Draft Mode**).
-2. **Create** a new instrument from scratch. Name it `m7c_attempt_log`.
+2. **Create** a new instrument from scratch. Name it `module_7_chatbot_log`.
    REDCap derives the form's *unique name* from what you type. It must end up
-   exactly `m7c_attempt_log`, so confirm it in the **Codebook** afterwards.
+   exactly `module_7_chatbot_log`, so confirm it in the **Codebook** afterwards.
 3. Add these fields. "Text" = *Text Box*; "Notes" = *Notes Box (Paragraph Text)*.
 
    | Variable | Type | Validation |
@@ -62,7 +62,7 @@ automatically, but your REDCap admins may need to review it.
    Variable names must match exactly. The Worker writes to them by name, and
    REDCap rejects the whole import if any of them is missing.
 
-**Option B: data dictionary upload.** `m7c_attempt_log_data_dictionary.csv`
+**Option B: data dictionary upload.** `module_7_chatbot_log_data_dictionary.csv`
 in this folder contains the same fields as data-dictionary rows. Upload
 *replaces* the whole dictionary, so: Project Setup → Data Dictionary →
 download the **current** dictionary → paste these rows at the end → upload →
@@ -72,18 +72,18 @@ review REDCap's change summary (it should show only additions) → commit.
 
 1. Project Setup → *Enable optional modules and customizations* →
    **Repeating instruments and events** → Modify.
-2. Tick `m7c_attempt_log`. Leave the custom label blank, or use
+2. Tick `module_7_chatbot_log`. Leave the custom label blank, or use
    `[m7a_saved_ts]`. Save.
 3. If you were in Draft Mode: **Submit Changes for Review**, and wait until
    the changes are live.
 
-Check: Codebook shows the form as `m7c_attempt_log`, marked repeating.
+Check: Codebook shows the form as `module_7_chatbot_log`, marked repeating.
 
 ### 3. REDCap: check the API user can read and write the new form
 
 The `practice-log` Worker uses the API token of a specific REDCap user. Under
 **User Rights**, open that user (or their role) and check that its data-entry
-rights for `m7c_attempt_log` are **View & Edit**, and its export rights are
+rights for `module_7_chatbot_log` are **View & Edit**, and its export rights are
 **Full Data Set**.
 
 This matters: if the user can write the form but not export it, the Worker
@@ -120,7 +120,7 @@ empty or 0. Don't use a real participant's token.
 1. Open `training/practice-chat.html?token=<test token>` on the live site.
 2. **Attempt 1:** chat, let the timer run out, and on the feedback screen
    **don't** click Complete Module yet. In REDCap, the record should have
-   instance #1 of `m7c_attempt_log` with `m7a_stage = timer_end` and a
+   instance #1 of `module_7_chatbot_log` with `m7a_stage = timer_end` and a
    transcript. `module7_complete` should still be empty or 0.
 3. Click **Complete Module**. Instance #1 should now be `completed` and have
    ratings; there should be **no** instance #2. The flat `m7c_*` fields
@@ -147,7 +147,7 @@ Afterwards, delete the test instances or the test record.
 
 ## Reading the data
 
-Export `m7c_attempt_log` (Data Exports, or the API with `forms=m7c_attempt_log`).
+Export `module_7_chatbot_log` (Data Exports, or the API with `forms=module_7_chatbot_log`).
 Each row is one attempt: `record_id` + `redcap_repeat_instance`. Instance
 numbers follow the order attempts were first saved. `m7a_transcript` is a
 JSON array of `{role, content, timestamp}`, where `role` is `user` for the

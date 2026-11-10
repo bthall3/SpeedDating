@@ -8,7 +8,7 @@
    The only one of the three practice-* Workers that touches REDCap.
 
    Every practice date ("attempt") is kept, as its own instance of the
-   repeating instrument `m7c_attempt_log` (fields prefixed m7a_). The page
+   repeating instrument `module_7_chatbot_log` (fields prefixed m7a_). The page
    POSTs twice per attempt, with the same client-generated attempt_id:
      stage "timer_end"  -- sent automatically when the 4-minute timer hits
                            0, so the transcript survives even if the
@@ -40,7 +40,7 @@
      m7c_rating_<cat> / m7c_comment_<cat>, m7c_overall_note,
      m7c_chat_started_ts, m7c_chat_completed_ts
 
-   REDCAP SETUP -- NEW instrument `m7c_attempt_log`, marked REPEATING
+   REDCAP SETUP -- NEW instrument `module_7_chatbot_log`, marked REPEATING
    (Project Setup > Repeating instruments and events) BEFORE deploying:
      m7a_attempt_id        Text
      m7a_stage             Text   ("timer_end" or "completed")
@@ -65,7 +65,7 @@ const RECORD_ID_FIELD = "record_id";
 const TOKEN_FIELD = "access_token";
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{10,64}$/;
 const ATTEMPT_ID_PATTERN = /^[A-Za-z0-9-]{8,64}$/;
-const ATTEMPT_INSTRUMENT = "m7c_attempt_log";
+const ATTEMPT_INSTRUMENT = "module_7_chatbot_log";
 const STAGES = ["timer_end", "completed"];
 
 const CATEGORY_FIELD_MAP = {
@@ -302,7 +302,7 @@ export default {
       firstAttempt = true;
     }
 
-    // 2. Every attempt -> its own m7c_attempt_log instance.
+    // 2. Every attempt -> its own module_7_chatbot_log instance.
     let logged = false;
     try {
       const instance = await resolveAttemptInstance(recordId, attemptId, env);
