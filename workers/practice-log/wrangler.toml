@@ -1,0 +1,10 @@
+name = "practice-log"
+main = "index.js"
+compatibility_date = "2026-09-01"
+
+# REDCAP_API_URL is already set on the deployed Worker in the Cloudflare
+# dashboard; keep_vars stops a `wrangler deploy` from wiping it.
+keep_vars = true
+
+# Secrets (set in the dashboard or with `npx wrangler secret put <NAME>`):
+#   REDCAP_API_TOKEN  -- REDCap token with import + export rights

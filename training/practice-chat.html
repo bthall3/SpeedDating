@@ -230,6 +230,13 @@ let timerInterval = null;
 let chatStartedTs = null;
 let sessionEnded = false;
 let feedbackResult = null;
+let attemptId = null;        // one per practice date; shared by both log POSTs
+let timerSavePromise = null; // the automatic save sent when the timer ends
+
+function newAttemptId() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 12);
+}
 
 function nowIso() {
   return new Date().toISOString();
@@ -325,6 +332,7 @@ function attachChatHandlers() {
 async function startChat() {
   screen = "chat";
   chatStartedTs = new Date();
+  attemptId = newAttemptId();
   render();
   startTimer();
 
@@ -415,7 +423,37 @@ function endSession() {
 
   screen = "feedback";
   render();
+  // Save the transcript now, so it is kept even if the participant closes
+  // the tab before clicking Complete Module. Failures are only logged:
+  // Complete Module sends the same attempt again.
+  timerSavePromise = postLog("timer_end").catch(err => {
+    console.error("practice timer-end save failed:", err);
+  });
   requestFeedback();
+}
+
+function buildLogPayload(stage) {
+  const hasFeedback = feedbackResult && !feedbackResult.error;
+  return {
+    token: TOKEN,
+    attempt_id: attemptId,
+    stage: stage,
+    persona: persona,
+    transcript: transcript,
+    categories: hasFeedback ? feedbackResult.categories : null,
+    overall_note: hasFeedback ? feedbackResult.overall_note : null,
+    duration_seconds: CONFIG.timerSeconds - Math.max(secondsLeft, 0),
+    chat_started_ts: chatStartedTs ? formatRedcapDatetime(chatStartedTs) : ""
+  };
+}
+
+async function postLog(stage) {
+  const res = await fetch(CONFIG.logEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(buildLogPayload(stage))
+  });
+  if (!res.ok) throw new Error("log request failed");
 }
 
 /* ---- Feedback screen ---- */
@@ -436,9 +474,10 @@ function renderFeedback() {
       <div class="eyebrow">Module 7 · Practice Date</div>
       <h1>Your feedback</h1>
       <div class="feedback-error">
-        <p>We couldn't generate feedback for this session. Your conversation was still saved — you can continue and let the research team know if this keeps happening.</p>
+        <p>We couldn't generate feedback for this session. Your conversation will still be saved — you can continue and let the research team know if this keeps happening.</p>
       </div>
-      <button class="btn" onclick="completeModule()">Complete Module</button>
+      <div class="error-text" id="logError">Something went wrong saving your session. Please try again.</div>
+      <button class="btn" id="completeBtn" onclick="completeModule()">Complete Module</button>
     `;
   }
 
@@ -490,25 +529,12 @@ async function completeModule() {
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...'; }
   if (errorText) errorText.style.display = "none";
 
-  const durationSeconds = CONFIG.timerSeconds - Math.max(secondsLeft, 0);
-
-  const payload = {
-    token: TOKEN,
-    persona: persona,
-    transcript: transcript,
-    categories: feedbackResult && !feedbackResult.error ? feedbackResult.categories : null,
-    overall_note: feedbackResult && !feedbackResult.error ? feedbackResult.overall_note : null,
-    duration_seconds: durationSeconds,
-    chat_started_ts: chatStartedTs ? formatRedcapDatetime(chatStartedTs) : ""
-  };
+  // Let the timer-end save land first, so both POSTs resolve to the same
+  // REDCap instance instead of racing to create two.
+  if (timerSavePromise) await timerSavePromise;
 
   try {
-    const res = await fetch(CONFIG.logEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error("log request failed");
+    await postLog("completed");
 
     document.getElementById("app").innerHTML = `
       <div class="eyebrow">Module 7 · Complete</div>

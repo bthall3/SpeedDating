@@ -27,7 +27,7 @@ Every page that needs a backend (submission, check-in, match computation, token 
 - `training/index.html` → `resolve-token.bthall3.workers.dev/resolve-token` (`GET ?t=<token>`)
 - `training/module-*.html`, `practice-chat.html` → per-module `submitEndpoint`/`saveEndpoint`/`chatEndpoint`/`feedbackEndpoint`/`logEndpoint`
 
-**Except `workers/dashboard-stats/` (below), none of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
+**Except `workers/dashboard-stats/`, `workers/reschedule-participant/` and `workers/practice-log/` (below), none of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
 
 ## Styling conventions
 
@@ -46,3 +46,7 @@ Pages that need to remember state across visits use `localStorage` directly (no 
 ## Researcher dashboard Worker
 
 `workers/dashboard-stats/` is the one Worker whose source is versioned here (read-only; aggregates REDCap + probes the other Workers via service bindings). Deploy steps and probe limits are in its README. If you add a Worker, add a probe in `PROBES` and a binding in `wrangler.toml`; probes must never write data.
+
+## Practice-log Worker
+
+`workers/practice-log/` saves module 7 practice dates to REDCap. `practice-chat.html` POSTs twice per attempt with one client-generated `attempt_id`: `stage: "timer_end"` automatically when the timer hits 0, then `stage: "completed"` from the Complete Module button (adds feedback). Every attempt becomes one instance of the repeating instrument `m7c_attempt_log` (`m7a_*` fields), matched on `m7a_attempt_id`. The flat `m7c_*` fields and `module7_complete` still hold only the first *completed* attempt. The REDCap instrument must exist and be marked repeating before deploying.
