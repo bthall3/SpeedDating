@@ -27,7 +27,7 @@ Every page that needs a backend (submission, check-in, match computation, token 
 - `training/index.html` → `resolve-token.bthall3.workers.dev/resolve-token` (`GET ?t=<token>`)
 - `training/module-*.html`, `practice-chat.html` → per-module `submitEndpoint`/`saveEndpoint`/`chatEndpoint`/`feedbackEndpoint`/`logEndpoint`
 
-**Except `workers/dashboard-stats/`, `workers/reschedule-participant/` and `workers/practice-log/` (below), none of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
+**Except `workers/dashboard-stats/`, `workers/reschedule-participant/`, `workers/practice-log/` and `workers/compute-matches/` (below), none of these Workers live in this repo.** All of the Workers named above are deployed in the Cloudflare account (verified Oct 2026), but their source is not versioned here. Changing request/response shapes here requires coordinating with whatever repo/dashboard hosts the actual Worker code.
 
 ## Styling conventions
 
@@ -50,3 +50,7 @@ Pages that need to remember state across visits use `localStorage` directly (no 
 ## Practice-log Worker
 
 `workers/practice-log/` saves module 7 practice dates to REDCap. `practice-chat.html` POSTs twice per attempt with one client-generated `attempt_id`: `stage: "timer_end"` automatically when the timer hits 0, then `stage: "completed"` from the Complete Module button (adds feedback). Every attempt becomes one instance of the repeating instrument `module_7_chatbot_log` (`m7a_*` fields), matched on `m7a_attempt_id`. The flat `m7c_*` fields and `module7_complete` still hold only the first *completed* attempt. The REDCap instrument must exist and be marked repeating before deploying.
+
+## Compute-matches Worker
+
+`workers/compute-matches/` is the source of the deployed `compute-matches` Worker (pulled from Cloudflare Nov 2026). Attendees are `[event_num]='<event>' and [pid] != ''` — `event_num` alone is only the *scheduled* event; `pid` is written by the checkin Worker at arrival. Every attendee gets `match_count` written (0 if none), which is what fires the REDCap match / no-match Alert, so never widen the attendee query to unchecked-in records. Secrets: `REDCAP_API_TOKEN`, `ADMIN_SECRET`.

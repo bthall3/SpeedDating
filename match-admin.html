@@ -167,7 +167,7 @@
             `Mutual matches found: ${data.mutualMatchesFound}\n` +
             `People emailed: ${data.peopleProcessed}\n` +
             (data.alreadyProcessedSkipped ? `Already processed (skipped): ${data.alreadyProcessedSkipped}\n` : "") +
-            (data.diagnostics ? `\nAttendees (event_num match): ${data.diagnostics.attendeesFromEventNum}\nFull rows returned: ${data.diagnostics.fullRowsReturned}\nScorecard rows found: ${data.diagnostics.scorecardRowsFound}\n` + (data.diagnostics.unresolvedPartnerPids.length ? `Unresolved partner PIDs (typos?): ${data.diagnostics.unresolvedPartnerPids.join(", ")}\n` : "") : "") +
+            (data.diagnostics ? `\nAttendees (checked in): ${data.diagnostics.attendeesCheckedIn ?? data.diagnostics.attendeesFromEventNum}\nFull rows returned: ${data.diagnostics.fullRowsReturned}\nScorecard rows found: ${data.diagnostics.scorecardRowsFound}\n` + (data.diagnostics.unresolvedPartnerPids.length ? `Unresolved partner PIDs (typos?): ${data.diagnostics.unresolvedPartnerPids.join(", ")}\n` : "") : "") +
             (previewText ? `\nPer-person preview:\n${previewText}` : ""),
             false
           );
